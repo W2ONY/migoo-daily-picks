@@ -1,0 +1,3 @@
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/js/javascript-Dn5mSdeN.js","assets/js/typescript-Ck8Qox8i.js","assets/js/editor.api-Bo6jdsez.js","assets/css/editor-CVW-2Oo8.css"])))=>i.map(i=>d[i]);
+import{_ as s}from"./download-3bO1yW6j.js";import{r as i}from"./_.contribution-DeJ0trOd.js";import"./react-core-BPoUIz6j.js";import"./editor.api-Bo6jdsez.js";i({id:"javascript",extensions:[".js",".es6",".jsx",".mjs",".cjs"],firstLine:"^#!.*\\bnode",filenames:["jakefile"],aliases:["JavaScript","javascript","js"],mimetypes:["text/javascript"],loader:()=>s(()=>import("./javascript-Dn5mSdeN.js"),__vite__mapDeps([0,1,2,3]))});
+//# sourceMappingURL=javascript.contribution-CHQQg4qe.js.map

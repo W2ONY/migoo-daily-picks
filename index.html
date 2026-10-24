@@ -1,0 +1,291 @@
+<!doctype html>
+<html
+  lang="en"
+  translate="no"
+>
+  <head>
+    <!-- 第一次打开（浏览器里没选过方案）默认进方案五；悬浮球仍可切换 -->
+    <script>window.LV_DEFAULT_VARIANT = window.LV_DEFAULT_VARIANT || 'v5'</script>
+    <script>window.LV_BASE='/migoo-daily-picks';window.LV_DATA_PARTS=8;window.LV_DEFAULT_VARIANT="v5";</script>
+    <!-- 本地镜像：接口回放层，必须先于应用脚本执行 -->
+    <script src="/migoo-daily-picks/mock/mock-api.js"></script>
+    <!-- 本地改版：根路径默认进入 Daily Picks -->
+    <script>
+      if (window.lvPath() === '/' || window.lvPath() === '') history.replaceState(history.state, '', (window.LV_BASE || '') + '/daily-picks' + location.search + location.hash)
+      // 静态托管刷新子页面时会补成目录形式（/home/），应用路由不认结尾斜杠会不停重载，这里去掉
+      else if (/.\/$/.test(window.lvPath())) history.replaceState(history.state, '', location.pathname.replace(/\/+$/, '') + location.search + location.hash)
+    </script>
+    <!-- SRI integrity hashes recalculated after build -->
+    <meta name="migoo-web-version" content="1f6cd92_20261024111137">
+
+    <meta charset="UTF-8" />
+    <meta
+      name="google"
+      content="notranslate"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      href="/migoo-daily-picks/favicon-new.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/file/apple-touch-icon.png"
+    />
+    <!-- manifest href 占位符: 构建时被 manifest-href-plugin 替换为 NGINX 提供的同源 /file 路径，避开 CDN base 重写带来的缓存问题 -->
+    <link
+      rel="manifest"
+      href="/file/manifestV1.json"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+    />
+    <meta
+      name="apple-mobile-web-app-capable"
+      content="yes"
+    />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="default"
+    />
+    <meta
+      name="format-detection"
+      content="telephone=no"
+    />
+    <title>Migoo - Auto Your Tasks for Work and Life.</title>
+    <meta
+      name="description"
+      content="Migoo is a proactive AI assistant that works ahead of you across email, calendar, meetings, work reports, LinkedIn, and CV optimization."
+    />
+    <link
+      rel="canonical"
+      href="https://migoo.ai"
+      data-rh="true"
+    />
+    <meta
+      name="robots"
+      content="index, follow"
+      data-rh="true"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://migoo.ai/#organization",
+            "name": "Migoo",
+            "url": "https://migoo.ai/",
+            "logo": {
+              "@type": "ImageObject",
+              "@id": "https://migoo.ai/#organization-logo",
+              "url": "https://migoo.ai/file/round-icon-512.png",
+              "contentUrl": "https://migoo.ai/file/round-icon-512.png"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://migoo.ai/#website",
+            "url": "https://migoo.ai/",
+            "name": "Migoo",
+            "publisher": { "@id": "https://migoo.ai/#organization" },
+            "inLanguage": "en"
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://migoo.ai/#webpage",
+            "url": "https://migoo.ai/",
+            "name": "Migoo - Auto Your Tasks for Work and Life.",
+            "isPartOf": { "@id": "https://migoo.ai/#website" },
+            "about": { "@id": "https://migoo.ai/#mobile-application" },
+            "inLanguage": "en"
+          },
+          {
+            "@type": "MobileApplication",
+            "@id": "https://migoo.ai/#mobile-application",
+            "name": "Migoo",
+            "url": "https://migoo.ai/",
+            "description": "Most AI waits. Migoo moves. Give it an auto task and it works quietly in the background — across email, calendar, meetings, projects, and the job hunt — drafting your replies, prepping your meetings, writing your reports, sharpening your CV. It does the groundwork; you make the call. Proactive by design, approved by you.",
+            "applicationCategory": "UtilitiesApplication",
+            "applicationSubCategory": "AI personal assistant",
+            "operatingSystem": ["iOS", "Android"],
+            "sameAs": [
+              "https://www.youtube.com/@DeveloperMigoo",
+              "https://www.tiktok.com/@migoo_ai",
+              "https://www.instagram.com/migooai_official/",
+              "https://x.com/MigooAI",
+              "https://www.linkedin.com/in/migoo-ai-4344683b4/"
+            ],
+            "publisher": { "@id": "https://migoo.ai/#organization" },
+            "author": { "@id": "https://migoo.ai/#organization" },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "availability": "https://schema.org/InStock",
+              "url": "https://migoo.ai/"
+            }
+          }
+        ]
+      }
+    </script>
+    <!-- Tracking SDK 不再在此加载：由 consent 执行器（managers/consent/executors/tms.ts）在用户允许
+         Analytics 后运行时插入脚本，docs/260914-cookie-sdk-consent/td.md §6.2 -->
+    <!--
+      形态判定的唯一真源：判一次 UA，结果只落到 <html data-device> 这一个载体——
+      CSS 的 .on-mobile()/.on-pc() 与 JS 的 getIsMobile() 读的是同一个属性，不存在两份状态。
+      刻意不往 window 上挂全局变量：页面内有 GTM / tracking SDK 等第三方脚本，
+      全局命名空间有被覆盖的风险，且两份状态天然存在不一致的失败模式。
+      必须内联且在首屏 CSS 之前，否则会闪一帧错误形态。
+      设计与各条规则的前提见 docs/web/260804-mobile-detection-ua/td.md
+    -->
+    <script>
+      ;(function () {
+        var ua = navigator.userAgent
+        // 规则 0 优先于全部 UA 规则：gabridge 是 Migoo App WebView 注入的 native bridge，
+        // 属运行时事实，强于 UA 字符串推断。判定条件与 managers/nativeBridge 的 isInApp()
+        // 同源（内联脚本无法 import，两处必须保持一致）。
+        // 规则 3 的 Macintosh + 触点 = iPadOS 13+ 桌面模式；前提是 Apple 未出触屏 Mac，
+        // 触点信号只用于消歧 Macintosh、不作通用信号（否则触屏 Win 笔记本会被误判）
+        var isMobile =
+          Boolean(window.gabridge) ||
+          /iPhone|iPod|Android|Windows Phone/i.test(ua) ||
+          /iPad/i.test(ua) ||
+          (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
+        // preload 的 contextBridge 在页面脚本之前执行，故此处可读 desktopAPI
+        var isShell = typeof window.desktopAPI !== 'undefined'
+
+        var el = document.documentElement
+        el.setAttribute('data-device', isMobile ? 'mobile' : 'pc')
+        // 壳 / 平台判定走 managers/desktopBridge 的运行时探测，这里不打壳标记
+        // 布局形态：在 data-device 的 mobile/pc 二分之上，把桌面壳单独分出第三态。
+        // 壳与 web-pc 同为非移动端（UA 判定下壳恒为 pc），但可用区域构成不同——壳有
+        // 自绘标题栏与侧边浏览器，多区域布局据此选骨架，故形态需要三态而非二态。
+        // 与 data-device 同源同时机写入，不构成第二份判定：mobile 与壳互斥，取值直接由
+        // 上面两个变量推出。JS 侧 utils/formFactor.ts 只读本属性，不重跑探测
+        el.setAttribute(
+          'data-form-factor',
+          isShell ? 'desktop-shell' : isMobile ? 'web-h5' : 'web-pc'
+        )
+        if (/Android/i.test(ua)) el.classList.add('is-android')
+      })()
+    </script>
+    <!-- 首屏关键请求的连接预热：i18n 字典 CDN 与 API 集群域名（/allow 由 main.tsx 入口即发）。
+         API 域名按 services/regionEarlyRequest 的同一规则推导，规则分叉只损失预热、不影响请求本身；
+         /allow 带凭据，preconnect 必须 use-credentials 才能被它复用 -->
+    <link
+      rel="preconnect"
+      href="https://deo.shopeemobile.com"
+      crossorigin="anonymous"
+    />
+    <script>
+      ;(function () {
+        if (typeof window.desktopAPI !== 'undefined') return
+        var cid = ''
+        try {
+          cid = (localStorage.getItem('migoo:cid') || '').toUpperCase()
+        } catch (e) {
+          return
+        }
+        var host = location.host.replace(/^(us|sg)\./i, '')
+        var link = document.createElement('link')
+        link.rel = 'preconnect'
+        link.crossOrigin = 'use-credentials'
+        link.href =
+          location.protocol + '//' + (cid === 'SG' ? 'sg' : 'us') + '.' + host
+        document.head.appendChild(link)
+      })()
+    </script>
+    <!-- Google Ads tag (gtag.js)：已注释停用，转化跟踪改由下方 GTM 容器承接 -->
+    <!--
+    <script>
+      ;(function () {
+        if (!location.hostname.endsWith('migoo.ai')) return
+        window.dataLayer = window.dataLayer || []
+        function gtag() {
+          dataLayer.push(arguments)
+        }
+        var s = document.createElement('script')
+        s.async = true
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=AW-18246004169'
+        document.head.appendChild(s)
+        gtag('js', new Date())
+        gtag('config', 'AW-18246004169')
+      })()
+    </script>
+    -->
+    <!-- Google Tag Manager 不再在此内联：由 consent 执行器（managers/consent/executors/gtm.ts）在
+         Analytics 与 Marketing 都允许后运行时注入，域名门控保留在执行器内，
+         docs/260914-cookie-sdk-consent/td.md §6.3 -->
+    <script type="module" crossorigin src="/migoo-daily-picks/assets/js/main-BnnDsPYy.js"></script>
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/react-core-BPoUIz6j.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/download-3bO1yW6j.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/search-DiUzoMdW.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/shared-utils-vendor-DyYRynt1.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/misc-vendor-Bt-EeJvY.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/logger-BdVAsCvh.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/points-star-solid-L4M-11oO.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/index-DvJVyHTt.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/logo-new-BjWZgMtw.js">
+    <link rel="stylesheet" crossorigin href="/migoo-daily-picks/assets/css/download-D-OD-1IS.css">
+    <link rel="stylesheet" crossorigin href="/migoo-daily-picks/assets/css/search-C7Ho-WSS.css">
+    <link rel="stylesheet" crossorigin href="/migoo-daily-picks/assets/css/main-DFmveCcU.css">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/router-vendor-21QqkbIW.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/ConsentHost-DycJZHz4.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/index-BSsC76Gd.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/i18nMetrics-DehgD_aF.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/check-CXmD8wDF.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/index-CwQLc_SY.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/logo-with-text-DWlD4yIR.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/levelMeter-D3ZsPNzy.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/markdown-parse-vendor-BaupXpwP.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/store-vendor-NJ6sbpUx.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/suggestion-DQRxlLaj.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/antd-base-vendor-zXmmbz5q.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/compressImage-CzdRPOlf.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/utils-vendor-D-u8d2lA.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/index-DVJ0ZQiK.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/chevron-right-thin-CarsN893.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/ScrollArea-BTvvXu0f.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/index-DhA3qoj5.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/index-BedfCA5O.js">
+    <link rel="modulepreload" crossorigin href="/migoo-daily-picks/assets/js/useLogin-D3gAkOdV.js">
+    <script type="application/json" id="post-login-prefetch">["/migoo-daily-picks/assets/js/tab-scroll-right-Dmewob1F.js","/migoo-daily-picks/assets/css/tab-scroll-right-jtGnJFUX.css","/migoo-daily-picks/assets/js/index-CmZGW-Az.js","/migoo-daily-picks/assets/css/index-CW89muw0.css","/migoo-daily-picks/assets/js/index-CLBQI6ST.js","/migoo-daily-picks/assets/css/index-H1XfKYtU.css","/migoo-daily-picks/assets/js/index-CV0jqP5H.js","/migoo-daily-picks/assets/css/index-B1p5Ep4t.css","/migoo-daily-picks/assets/js/antd-vendor-Bv_Nx3BA.js","/migoo-daily-picks/assets/js/PlanGroupCard-Bkw9f2yN.js","/migoo-daily-picks/assets/css/PlanGroupCard-F45jXoG3.css","/migoo-daily-picks/assets/js/InternalToolsPanel-Ds5drFnK.js","/migoo-daily-picks/assets/css/InternalToolsPanel-CS6rMggt.css","/migoo-daily-picks/assets/js/sendTracker-BCCsm7Oo.js","/migoo-daily-picks/assets/js/skillsEntrySource-DsqblMX9.js","/migoo-daily-picks/assets/css/skillsEntrySource-CUFXq6CE.css","/migoo-daily-picks/assets/js/controlledReload-Bb1Ui52Y.js","/migoo-daily-picks/assets/js/arrow-right-light-DEc1ExJ2.js","/migoo-daily-picks/assets/js/draftSelectors-50w6MmyI.js","/migoo-daily-picks/assets/js/retry-Clwty2fC.js","/migoo-daily-picks/assets/js/TopupQuantityPanel-qlbeGv26.js","/migoo-daily-picks/assets/css/TopupQuantityPanel-DhsEFXQo.css","/migoo-daily-picks/assets/js/markdown-vendor-Cn3FAbG7.js","/migoo-daily-picks/assets/js/taskPageEntries-DdBi8qI1.js","/migoo-daily-picks/assets/css/taskPageEntries-DQjE4T_-.css","/migoo-daily-picks/assets/js/checkbox-on-CyKweoAa.js","/migoo-daily-picks/assets/css/checkbox-on-CRkRLazP.css","/migoo-daily-picks/assets/js/index-Bne3I82X.js","/migoo-daily-picks/assets/css/index-Ck5XBhQA.css","/migoo-daily-picks/assets/js/index-BvmuOabW.js","/migoo-daily-picks/assets/css/index-Di7YYgoL.css","/migoo-daily-picks/assets/js/useComposerPreset-BHyuYPFi.js","/migoo-daily-picks/assets/css/useComposerPreset-DptttQ3L.css","/migoo-daily-picks/assets/js/microphoneDevice-BEATtID6.js","/migoo-daily-picks/assets/js/recordingSession-BpGGV5HQ.js","/migoo-daily-picks/assets/js/submitRequestSelectors-BIWaW_-h.js","/migoo-daily-picks/assets/css/submitRequestSelectors-C1VHxtg_.css","/migoo-daily-picks/assets/js/skill-folder-Dx_IEjFL.js","/migoo-daily-picks/assets/css/skill-folder-DDhJ4LGe.css","/migoo-daily-picks/assets/js/init-ClN8yVRF.js","/migoo-daily-picks/assets/css/init-BbRiSfKJ.css","/migoo-daily-picks/assets/js/index-Wk2CJK-L.js","/migoo-daily-picks/assets/css/index-CFBbMWrf.css","/migoo-daily-picks/assets/js/text-CU_dGISK.js","/migoo-daily-picks/assets/js/index-BdwhLYqF.js","/migoo-daily-picks/assets/css/index-ibJpUF0I.css","/migoo-daily-picks/assets/js/index-9cFPKBdB.js","/migoo-daily-picks/assets/css/index-vqc9lgnM.css","/migoo-daily-picks/assets/js/index-DER5ssPC.js","/migoo-daily-picks/assets/css/index-CO8oVfGm.css","/migoo-daily-picks/assets/js/useDesktopLocalPath-BtERPxE2.js","/migoo-daily-picks/assets/css/useDesktopLocalPath-Df_gi8nI.css","/migoo-daily-picks/assets/js/ComposerShell-B16CfMWw.js","/migoo-daily-picks/assets/css/ComposerShell-DZMORRl5.css","/migoo-daily-picks/assets/js/pickTypeItems-CsgQ44Ux.js","/migoo-daily-picks/assets/css/pickTypeItems-D3MrfyfS.css","/migoo-daily-picks/assets/js/TiptapAdapter-CXGwsQp4.js","/migoo-daily-picks/assets/css/TiptapAdapter-DpmXa5OT.css","/migoo-daily-picks/assets/js/appendRecommendation-C0CBVH6t.js","/migoo-daily-picks/assets/js/sendTracking-DfktAclV.js","/migoo-daily-picks/assets/js/ParamDropdowns-DJURPFYi.js","/migoo-daily-picks/assets/css/ParamDropdowns-B5DUrcuD.css","/migoo-daily-picks/assets/js/useTabScrollMemory-CEKWdJpb.js","/migoo-daily-picks/assets/js/startFlow-CmMMgTQH.js","/migoo-daily-picks/assets/js/index-JVEq7dRI.js","/migoo-daily-picks/assets/css/index-CIH7jOCx.css","/migoo-daily-picks/assets/js/index-BIH4NMKC.js","/migoo-daily-picks/assets/css/index-6wAgtWid.css","/migoo-daily-picks/assets/js/GalleryFeedback-C1tq6KjY.js","/migoo-daily-picks/assets/css/GalleryFeedback-hNRhjNOa.css","/migoo-daily-picks/assets/js/index-CHm19Sb0.js","/migoo-daily-picks/assets/css/index-EKQ1rH7l.css"]</script>
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/migoo-daily-picks/assets/woff2/InterRegular-core-BYdWNZPI.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/migoo-daily-picks/assets/woff2/InterMedium-core-DPsbAQwu.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/migoo-daily-picks/assets/woff2/InterSemiBold-core-CA4wRCPk.woff2">
+      <link rel="stylesheet" href="/migoo-daily-picks/local/overrides.css" />
+    <script src="/migoo-daily-picks/local/variants.js"></script>
+    <script src="/migoo-daily-picks/local/categories.js"></script>
+    <script src="/migoo-daily-picks/local/chat-cards.js"></script>
+    <script src="/migoo-daily-picks/local/hero.js"></script>
+    <script src="/migoo-daily-picks/local/try-this.js"></script>
+  </head>
+
+  <body>
+    <!-- GTM noscript iframe 已移除：它绕过运行时 consent，禁 JS 时本站也无法工作，无兜底价值 -->
+    <div
+      class="static-footer"
+      style="display: none"
+    >
+      <span class="static-footer-copyright"
+        >&copy;2026 Migoo by InfiniteAI Private Limited</span
+      >
+      <div class="static-footer-links">
+        <a href="/policy">Privacy Policy</a>
+        <span class="static-footer-divider">·</span>
+        <a href="/terms">Terms of Service</a>
+        <span class="static-footer-divider">·</span>
+        <a href="/contact-us">Contact Us</a>
+      </div>
+    </div>
+
+    <!-- ====== React 应用 ====== -->
+    <div id="root"></div>
+  </body>
+</html>

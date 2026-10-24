@@ -1,0 +1,4112 @@
+/* 本地改版覆盖样式：只放在这里，不改 assets/ 里的线上构建产物 */
+
+/* 去掉左侧侧边栏（antd Sider，类名带构建哈希，用前缀匹配）：只在方案二~五；方案一保持线上原样（带侧边栏） */
+[data-lv-hero] aside[class*='_siteSider_'] {
+  display: none !important;
+}
+
+/* ---------- 方案切换悬浮球（所有方案都显示） ---------- */
+.lv-ball {
+  position: fixed;
+  right: 24px;
+  bottom: 120px;
+  z-index: 2000;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #7c3aed);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.35);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+  font-family: Inter, -apple-system, sans-serif;
+}
+.lv-ball-top {
+  font-size: 10px;
+  opacity: 0.85;
+}
+.lv-ball-label {
+  font-size: 15px;
+  font-weight: 600;
+}
+.lv-menu {
+  position: fixed;
+  right: 24px;
+  bottom: 182px;
+  z-index: 2000;
+  width: 248px;
+  padding: 8px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
+  font-family: Inter, -apple-system, sans-serif;
+  display: none;
+}
+.lv-menu.is-open {
+  display: block;
+}
+.lv-menu-title {
+  padding: 6px 10px 8px;
+  font-size: 12px;
+  color: #8a8f98;
+}
+.lv-menu-item {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: #1f2329;
+}
+.lv-menu-item:hover {
+  background: #f4f6fa;
+}
+.lv-menu-item b {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+.lv-menu-item small {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: #8a8f98;
+}
+.lv-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  border-radius: 50%;
+  border: 1.5px solid #c9cdd4;
+}
+.lv-menu-item.is-active .lv-dot {
+  border: 4px solid #2f6bff;
+}
+
+/* ---------- 方案二：Daydream 式顶栏 ---------- */
+.lv-topbar {
+  display: none;
+}
+[data-local-variant='v2'] .lv-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  height: 72px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  pointer-events: none;
+  font-family: Inter, -apple-system, sans-serif;
+}
+/* 原页面顶部右侧的 Liked 收进左侧胶囊的 Favorites，这里隐藏；原顶栏行加高给新顶栏让位 */
+[data-lv-hero] [class*='_pageTopBar_'] [class*='_actions_'] {
+  visibility: hidden;
+}
+/* 原顶栏行（滚动后会渐显白底）加高到 72px：方案二给新顶栏让位，方案三让吸顶胶囊上下各留 14px */
+[data-lv-hero] [class*='_pageTopBar_'] {
+  min-height: 72px;
+}
+.lv-pill {
+  pointer-events: auto;
+  height: 44px;
+  border: 1px solid #e3e5e8;
+  border-radius: 999px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+}
+.lv-tabs {
+  padding: 0 6px;
+  gap: 2px;
+}
+.lv-tab {
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 500;
+  color: #8a8f98;
+  cursor: pointer;
+}
+.lv-tab:hover {
+  color: #1f2329;
+}
+.lv-tab.is-active {
+  color: #1f2329;
+  font-weight: 600;
+}
+.lv-profile {
+  gap: 10px;
+  padding: 0 4px 0 18px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1f2329;
+}
+.lv-profile:hover,
+.lv-tabs:hover {
+  border-color: #c9cdd4;
+}
+.lv-profile-name {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lv-profile-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* 方案二：输入坞在副标题下，滚动后吸顶（位置由 variants.js 的 placeDock 计算） */
+[data-lv-hero] [class*='_dockLayer_'][data-lv-dock] {
+  top: var(--lv-dock-top) !important;
+  bottom: auto !important;
+  z-index: 950 !important;
+  pointer-events: none;
+}
+[data-lv-hero] [class*='_dockLayer_'][data-lv-dock] [class*='_dockOverlay_'] {
+  display: none !important;
+}
+/* 关掉原页面滚动后收成「Ask migoo」胶囊：面板始终显示，胶囊隐藏 */
+[data-lv-hero] [class*='_dockLayer_'][data-lv-dock] [class*='_dockPanel_'] {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: none !important;
+}
+[data-lv-hero] [class*='_dockLayer_'][data-lv-dock] [class*='_pill_'] {
+  display: none !important;
+}
+[data-lv-hero] [data-lv-dock='sticky'] .composer-shell__body {
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+}
+[data-lv-hero] [class*='_feedHeader_'] [class*='_headerChips_'] {
+  margin-top: calc(var(--lv-dock-h, 101px) + 24px * 2) !important;
+}
+
+/* 方案二：placeholder 轮播降价商品 */
+[data-lv-hero] [data-lv-ph] .is-editor-empty::before {
+  visibility: hidden;
+}
+.lv-ph {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 21px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.lv-ph-track {
+  transform: translateY(0);
+}
+.lv-ph-track.is-moving {
+  transform: translateY(-21px);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.lv-ph-line {
+  height: 21px;
+  line-height: 21px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #a8adb5;
+  white-space: nowrap;
+}
+.lv-ph-tag {
+  flex: none;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: #ebf5ee;
+  color: #1f9d55;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+}
+.lv-ph-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-ph-price {
+  flex: none;
+  color: #1f9d55;
+  font-weight: 600;
+}
+
+/* 方案二：吸顶后空闲时收成单行胶囊（参考左侧导航胶囊），聚焦 / 回填内容时动效展开 */
+[data-lv-hero] [data-lv-dock='sticky'] .composer-shell__body {
+  max-width: 800px;
+  margin: 0 auto;
+  transition:
+    max-width 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    padding 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-radius 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.32s ease,
+    border-color 0.32s ease;
+  border: 1px solid transparent;
+}
+[data-lv-hero] [data-lv-dock='sticky'] .composer-shell__footer {
+  max-height: 60px;
+  overflow: hidden;
+  transition:
+    max-height 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    min-height 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    margin-top 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.2s ease 0.08s;
+}
+[data-lv-hero] [data-lv-dock][data-lv-compact] .composer-shell__body {
+  max-width: 600px;
+  padding: 10.5px 20px;
+  border-radius: 999px;
+  border-color: #e3e5e8;
+  box-shadow: none;
+  cursor: text;
+}
+[data-lv-hero] [data-lv-dock][data-lv-compact] .composer-shell__body:hover {
+  border-color: #c9cdd4;
+}
+[data-lv-hero] [data-lv-dock][data-lv-compact] .composer-shell__footer {
+  max-height: 0;
+  min-height: 0;
+  margin-top: 0;
+  opacity: 0;
+  transition:
+    max-height 0.32s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.12s ease;
+}
+[data-lv-hero] [data-lv-dock][data-lv-compact] .composer-shell__header,
+[data-lv-hero] [data-lv-dock][data-lv-compact] .composer-shell__top,
+[data-lv-hero] [data-lv-dock][data-lv-compact] [class*='_closeInput_'] {
+  display: none !important;
+}
+
+/* 方案二：输入框上方只在选中能力后展示二级 query 推荐；一级能力 chips（Compare Prices 等）不常驻，
+   页面上已有那一排能力卡。× 跟着二级推荐一起出现 */
+[data-lv-hero] [data-lv-dock] .composer-shell__top:not(:has([class*='_queryList_'])) {
+  display: none !important;
+}
+[data-lv-hero] [data-lv-dock] [class*='_dockPanel_']:not(:has([class*='_queryList_'])) [class*='_closeInput_'] {
+  display: none !important;
+}
+
+/* 方案二：不要右上角 ×；吸顶时只保留输入框，不出二级 query 推荐 */
+[data-lv-hero] [data-lv-dock] [class*='_closeInput_'] {
+  display: none !important;
+}
+[data-lv-hero] [data-lv-dock='sticky'] .composer-shell__top {
+  display: none !important;
+}
+
+/* ---------- 方案二：个人中心浮层（hover 右上角头像胶囊） ---------- */
+.lv-acct {
+  position: fixed;
+  top: 66px;
+  right: 24px;
+  z-index: 990;
+  width: 380px;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+  padding: 12px;
+  border-radius: 28px;
+  background: #f4f5f7;
+  box-shadow:
+    0 24px 60px rgba(15, 23, 42, 0.18),
+    0 0 0 1px rgba(15, 23, 42, 0.04);
+  font-family: Inter, -apple-system, sans-serif;
+  color: #1f2329;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px) scale(0.98);
+  transform-origin: top right;
+  transition:
+    opacity 0.18s ease,
+    transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    visibility 0s linear 0.22s;
+}
+[data-lv-hero] .lv-acct.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 0.18s ease,
+    transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lv-acct button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.lv-acct-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 20px;
+  background: #fff;
+  text-align: left;
+}
+.lv-acct-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+.lv-acct-who {
+  flex: 1;
+  min-width: 0;
+}
+.lv-acct-who b {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+}
+.lv-acct-who small {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: #8a8f98;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lv-acct-chev svg,
+.lv-acct-arrow {
+  width: 18px;
+  height: 18px;
+  color: #a8adb5;
+  flex: none;
+}
+.lv-acct-plan {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 10px 10px 10px 16px;
+  border-radius: 20px;
+  background: #fff;
+}
+.lv-acct-plan-cell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.lv-acct-plan-label {
+  font-size: 12px;
+  color: #8a8f98;
+}
+.lv-acct-plan-cell b {
+  font-size: 16px;
+  font-weight: 600;
+}
+.lv-acct-upgrade {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #3b82f6, #7c3aed);
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 600;
+}
+.lv-acct-upgrade svg {
+  width: 16px;
+  height: 16px;
+}
+.lv-acct-group {
+  margin-top: 8px;
+  padding: 4px 0;
+  border-radius: 20px;
+  background: #fff;
+}
+.lv-acct-row {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 50px;
+  padding: 0 16px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 15px;
+}
+.lv-acct-row + .lv-acct-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 54px;
+  right: 16px;
+  border-top: 1px solid #eef0f2;
+}
+.lv-acct-row:hover {
+  background: #f7f8fa;
+}
+.lv-acct-icon svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+.lv-acct-label {
+  flex: 1;
+}
+.lv-acct-row.is-danger {
+  color: #e5484d;
+}
+.lv-acct-foot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 0 6px;
+  font-size: 12px;
+  color: #8a8f98;
+}
+.lv-acct-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: #8a8f98 !important;
+}
+.lv-acct-link:hover {
+  color: #1f2329 !important;
+}
+/* 原侧边栏头像菜单在方案二只作为 Invite Code / Feedback 的入口被脚本触发，不显示 */
+[data-lv-hero] .ant-popover[class*='_popoverRoot_ktz65_'] {
+  visibility: hidden !important;
+}
+
+/* 方案二 Chat（/home）：原会话页顶栏右侧的积分 / 试用 / Chat Files 让到插件引导和个人中心胶囊左边 */
+[data-local-variant='v2'] .home-header {
+  padding-right: 450px !important;
+}
+
+/* 方案二：浏览器插件引导（右侧个人中心旁） */
+.lv-left,
+.lv-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lv-ext {
+  gap: 8px;
+  padding: 0 18px 0 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1f2329;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.lv-ext:hover {
+  border-color: #c9cdd4;
+  background: #fafbfc;
+  color: #1f2329;
+}
+.lv-ext-logo {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+/* ---------- 方案切换球：可拖动 ---------- */
+.lv-ball {
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.lv-ball.is-dragging {
+  cursor: grabbing;
+  transform: scale(1.06);
+  box-shadow: 0 10px 28px rgba(59, 130, 246, 0.45);
+}
+
+/* ---------- 方案三：Phia 式左侧窄栏 ---------- */
+.lv-rail,
+.lv-ext-float,
+.lv-recent {
+  display: none;
+}
+[data-lv-rail] [class*='_dashboardLayout_'] {
+  padding-left: 64px;
+}
+[data-lv-rail] .lv-rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 960;
+  width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0 18px;
+  border-right: 1px solid #eef0f2;
+  background: #fafafa;
+  font-family: Inter, -apple-system, sans-serif;
+}
+.lv-rail button {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+}
+.lv-rail-logo {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 17px;
+  letter-spacing: -0.3px;
+  color: #1f2329;
+  padding: 0;
+}
+.lv-rail-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 36px;
+}
+.lv-rail-item {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5c6370;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.lv-rail-item svg {
+  width: 22px;
+  height: 22px;
+}
+.lv-rail-item:hover {
+  background: #eef0f3;
+  color: #1f2329;
+}
+.lv-rail-item.is-active {
+  background: #e8efff;
+  color: #2f6bff;
+}
+/* 名称提示：hover 时在图标右侧出现；Chat 有最近会话浮层，不再出提示 */
+.lv-rail-tip {
+  position: absolute;
+  left: 50px;
+  top: 50%;
+  transform: translate(-4px, -50%);
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #1f2329;
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.lv-rail-item:not(.has-flyout):hover .lv-rail-tip {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+.lv-rail-avatar {
+  margin-top: auto;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px #e3e5e8;
+}
+.lv-rail-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* 最近会话浮层（hover Chat） */
+[data-lv-rail] .lv-recent {
+  display: block;
+  position: fixed;
+  left: 72px;
+  z-index: 990;
+  width: 240px;
+  padding: 10px 8px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.14), 0 0 0 1px rgba(15, 23, 42, 0.04);
+  font-family: Inter, -apple-system, sans-serif;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-4px);
+  transition: opacity 0.15s ease, transform 0.18s ease, visibility 0s linear 0.18s;
+}
+[data-lv-rail] .lv-recent.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.15s ease, transform 0.18s ease;
+}
+.lv-recent-title {
+  padding: 4px 10px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2329;
+}
+.lv-recent-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  color: #5c6370;
+  text-align: left;
+  cursor: pointer;
+}
+.lv-recent-item:hover {
+  background: #f4f5f7;
+  color: #1f2329;
+}
+.lv-recent-item img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+}
+.lv-recent-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lv-recent-empty {
+  padding: 4px 10px 8px;
+  line-height: 1.5;
+  font-size: 13px;
+  color: #a8adb5;
+}
+/* 右上角插件引导 */
+[data-lv-rail] .lv-ext-float {
+  display: inline-flex;
+  position: fixed;
+  top: 14px;
+  right: 24px;
+  z-index: 950;
+}
+/* 个人中心浮层从左下头像弹出 */
+.lv-acct.at-rail {
+  top: auto;
+  right: auto;
+  left: 76px;
+  bottom: 14px;
+  transform-origin: bottom left;
+}
+/* Chat 页顶栏右侧按钮让到插件引导左边 */
+[data-lv-rail] .home-header {
+  padding-right: 250px !important;
+}
+
+/* 吸顶展开时：白色顶栏整体下拉，盖住到输入框下方 14px，输入框融进顶栏而不是单独浮起。
+   画在输入坞层的伪元素上（层有 24px 内边距，--lv-dock-top 为层相对页面顶部的偏移），随展开动画一起长高 */
+[data-lv-hero] [data-lv-dock='sticky']:not([data-lv-compact])::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--lv-dock-top) * -1);
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  background: #fff;
+  border-bottom: 1px solid #eef0f2;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  animation: lv-sheet-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-origin: top;
+}
+@keyframes lv-sheet-in {
+  from {
+    transform: scaleY(0.35);
+    opacity: 0;
+  }
+}
+[data-lv-hero] [data-lv-dock='sticky']:not([data-lv-compact]) .composer-shell__body {
+  box-shadow: none;
+  border-color: #e3e5e8;
+}
+
+/* 方案二、三：Chat 页顶栏不展示积分 / 试用徽标（积分已在个人中心浮层里） */
+[data-lv-hero] .home-header [class*='_pill_twc3n_'] {
+  display: none !important;
+}
+
+/* ---------- 方案四：Categories 商品分类（参考 daydream.ing） ---------- */
+.lv-cats {
+  position: relative;
+  /* 原 _feedHeader_ 是纵向 flex，能力 chips 异步渲染会被 React 追加到本节之后，用 order 保证分类始终在最后 */
+  order: 99;
+  width: 100%;
+  margin-top: 40px;
+  text-align: left;
+  font-family: Inter, -apple-system, sans-serif;
+}
+.lv-cats-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5c6370;
+}
+.lv-cats-heading {
+  margin: 8px 0 18px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  color: #1f2329;
+}
+.lv-cats-rowwrap {
+  position: relative;
+}
+.lv-cats-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  /* 横向滚动容器会裁掉纵向溢出：上下留出 hover 上浮和阴影的空间，再用负边距抵消占位 */
+  padding: 8px 6px 24px;
+  margin: -8px -6px -24px;
+}
+.lv-cats-row::-webkit-scrollbar {
+  display: none;
+}
+.lv-cat {
+  position: relative;
+  flex: none;
+  width: 220px;
+  height: 264px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  cursor: pointer;
+  background: linear-gradient(180deg, var(--c1), var(--c2));
+  color: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.lv-cat:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+.lv-cat-eyebrow {
+  position: absolute;
+  top: 26px;
+  left: 0;
+  right: 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+.lv-cat-title {
+  position: absolute;
+  top: 46px;
+  left: 8px;
+  right: 8px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 21px;
+  line-height: 1.2;
+}
+.lv-cat-stack {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  height: 150px;
+}
+.lv-cat-img {
+  position: absolute;
+  bottom: 0;
+  width: 104px;
+  height: 138px;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lv-cat-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+  box-sizing: border-box;
+}
+.lv-cat-img-left {
+  left: 20px;
+  transform: rotate(-7deg) translateY(4px) scale(0.88);
+  opacity: 0.92;
+}
+.lv-cat-img-right {
+  right: 20px;
+  transform: rotate(7deg) translateY(4px) scale(0.88);
+  opacity: 0.92;
+}
+.lv-cat-img-front {
+  left: 50%;
+  margin-left: -52px;
+  height: 146px;
+  z-index: 1;
+}
+.lv-cat:hover .lv-cat-img-left {
+  transform: rotate(-11deg) translate(-6px, 2px) scale(0.88);
+}
+.lv-cat:hover .lv-cat-img-right {
+  transform: rotate(11deg) translate(6px, 2px) scale(0.88);
+}
+.lv-cats-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+  border: 1px solid #e3e5e8;
+  border-radius: 50%;
+  background: #fff;
+  color: #1f2329;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.lv-cats-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+.lv-cats-arrow-prev {
+  left: -12px;
+}
+.lv-cats-arrow-next {
+  right: -12px;
+}
+.lv-cats-rowwrap.can-prev .lv-cats-arrow-prev,
+.lv-cats-rowwrap.can-next .lv-cats-arrow-next {
+  display: flex;
+}
+.lv-browse-heading {
+  /* 原 _feedHeader_ 自带底部留白，这里不再加下边距 */
+  margin: 48px 0 0;
+}
+/* 方案四：原 _feedHeader_ 底部留白 47px → 16px，让 Browse 标题紧贴下面的信息流 */
+[data-lv-cats] [class*='_feedHeader_'] {
+  padding-bottom: 16px !important;
+}
+
+/* ---------- Chat 里的商品卡（参考 app.wizard.com 推荐卡，chat-cards.js 渲染） ---------- */
+.lv-wz {
+  position: relative;
+  margin-top: 12px;
+  width: 100%;
+  font-family: Inter, -apple-system, sans-serif;
+  color: #1f2329;
+  text-align: left;
+}
+.lv-wz button,
+.lv-wz a {
+  font: inherit;
+  cursor: pointer;
+}
+.lv-wz-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 4px 4px 8px;
+  margin: -4px -4px 0;
+}
+.lv-wz-track::-webkit-scrollbar {
+  display: none;
+}
+.lv-wz-card {
+  position: relative;
+  flex: none;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #eef0f2;
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+  scroll-snap-align: start;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+.lv-wz-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  padding: 7px 16px 7px 14px;
+  border-radius: 0 0 14px 0;
+  background: #2f55d4;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+.lv-wz-media {
+  position: relative;
+  height: 190px;
+  padding: 18px 18px 6px;
+  background: #fff;
+}
+.lv-wz-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.lv-wz-mark {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #f4f6fb;
+  color: #2f55d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lv-wz-mark svg {
+  width: 18px;
+  height: 18px;
+}
+.lv-wz-mark.is-on svg {
+  fill: currentColor;
+}
+.lv-wz-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 16px 16px;
+}
+.lv-wz-brand {
+  font-size: 13px;
+  color: #5c6370;
+}
+.lv-wz-title {
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lv-wz-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #5c6370;
+}
+/* 五星：底色灰星 + 按评分比例裁出的金色星 */
+.lv-wz-stars {
+  position: relative;
+  display: inline-block;
+  font-size: 14px;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+.lv-wz-stars::before {
+  content: '★★★★★';
+  color: #e3e5e8;
+}
+.lv-wz-stars::after {
+  content: '★★★★★';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--pct);
+  overflow: hidden;
+  white-space: nowrap;
+  color: #f5a623;
+}
+.lv-wz-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.lv-wz-price sup {
+  font-size: 13px;
+  font-weight: 600;
+  vertical-align: 10px;
+}
+.lv-wz-was {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e6f6ea;
+  color: #2f6b3b;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.lv-wz-store {
+  margin-top: 2px;
+  font-size: 14px;
+  color: #5c6370;
+}
+.lv-wz-says {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid #c9d6ff;
+  border-radius: 12px;
+  background: #fbfcff;
+}
+.lv-wz-says-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2f55d4;
+}
+.lv-wz-says-head svg {
+  width: 14px;
+  height: 14px;
+}
+.lv-wz-quote {
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #1f2329;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lv-wz-quote b {
+  font-weight: 700;
+}
+.lv-wz-src {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #5c6370;
+}
+.lv-wz-src img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.lv-wz-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 14px;
+}
+.lv-wz-btn {
+  flex: 1;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lv-wz-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.lv-wz-btn-primary {
+  border: 0;
+  background: #2f55d4;
+  color: #fff !important;
+}
+.lv-wz-btn-primary:hover {
+  background: #2546b5;
+}
+.lv-wz-btn-ghost {
+  border: 1px solid #c9d6ff;
+  background: #fff;
+  color: #1f2329;
+}
+.lv-wz-btn-ghost svg {
+  color: #2f55d4;
+}
+.lv-wz-btn-ghost:hover {
+  border-color: #2f55d4;
+}
+.lv-wz-arrow {
+  position: absolute;
+  top: 180px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #2f55d4;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(47, 85, 212, 0.35);
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.lv-wz-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+.lv-wz-arrow-prev {
+  left: -14px;
+}
+.lv-wz-arrow-next {
+  right: -14px;
+}
+.lv-wz.can-prev .lv-wz-arrow-prev,
+.lv-wz.can-next .lv-wz-arrow-next {
+  display: flex;
+}
+.lv-wz-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.lv-wz-chip {
+  position: relative;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 1px solid #e3e5e8;
+  border-radius: 999px;
+  background: #fff;
+  color: #5c6370;
+  font-size: 14px;
+}
+.lv-wz-chip svg {
+  width: 16px;
+  height: 16px;
+}
+.lv-wz-chip:hover {
+  border-color: #c9cdd4;
+  color: #1f2329;
+}
+.lv-wz-chip.is-primary {
+  border-color: #2f55d4;
+  background: #2f55d4;
+  color: #fff;
+}
+.lv-wz-thumbs {
+  display: none;
+  gap: 2px;
+  margin-left: 4px;
+}
+.lv-wz-chip.is-open .lv-wz-thumbs {
+  display: inline-flex;
+}
+.lv-wz-thumb {
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #8a8f98;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.lv-wz-thumb:hover,
+.lv-wz-thumb.is-on {
+  background: #eef2ff;
+  color: #2f55d4;
+}
+.lv-wz-sources {
+  display: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.lv-wz-sources.is-open {
+  display: flex;
+}
+.lv-wz-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #f4f5f7;
+  color: #1f2329;
+  font-size: 13px;
+  text-decoration: none;
+}
+.lv-wz-source img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+.lv-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  z-index: 3000;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(31, 35, 41, 0.92);
+  color: #fff;
+  font-family: Inter, -apple-system, sans-serif;
+  font-size: 14px;
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+.lv-toast.is-in {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.lv-wz-amt {
+  white-space: nowrap;
+}
+
+/* 方案二 Auto-task 页：原页面标题栏（Auto-task 标题 + Add）在左上，会被新顶栏的导航胶囊盖住，整体下移到顶栏下方 */
+[data-local-variant='v2'] [class*='_header_1saob_'] {
+  margin-top: 64px;
+}
+
+/* Recent chats 定位到的那条提问闪一下 */
+.ai-self-chat-item.lv-flash {
+  animation: lv-flash 1.6s ease;
+  border-radius: 20px;
+}
+@keyframes lv-flash {
+  0%,
+  60% {
+    box-shadow: 0 0 0 4px rgba(47, 107, 255, 0.35);
+  }
+  100% {
+    box-shadow: 0 0 0 4px rgba(47, 107, 255, 0);
+  }
+}
+
+
+/* ---------- 方案四：Explore 页首屏 = Chat 区（参考 dupe.com 首屏，hero.js 渲染 Start here 行） ---------- */
+/* 标题下移到首屏约 22% 处；原能力 chips 行隐藏（改由 Keep shopping 里的 TRY THIS 卡触发） */
+[data-lv-v4] [class*='_feedHeader_'] {
+  padding-top: calc(var(--lv-hero-h, 820px) * 0.2) !important;
+}
+[data-lv-v4] [class*='_feedHeader_'] [class*='_headerChips_'] {
+  display: none !important;
+}
+.lv-keep {
+  order: 50;
+  /* 紧跟在输入框下方：输入框由 placeDock 放在标题下 24px 处，这里再留出输入框高度 + 56px */
+  margin-top: calc(var(--lv-dock-h, 101px) + 80px);
+  width: 100%;
+  text-align: left;
+  font-family: Inter, -apple-system, sans-serif;
+}
+/* 与「What are you shopping for?」同一套衬线标题样式 */
+.lv-keep-title {
+  margin-bottom: 18px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  color: #1f2329;
+}
+.lv-keep-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* 横向滚动容器会裁掉纵向溢出：上下留出 hover 上浮的空间，再用负边距抵消占位 */
+  padding: 6px 4px 10px;
+  margin: -6px -4px -10px;
+}
+.lv-keep-row::-webkit-scrollbar {
+  display: none;
+}
+.lv-keep-card {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+  max-width: 300px;
+  height: 76px;
+  padding: 0 18px;
+  border-radius: 16px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.lv-keep-card:hover {
+  transform: translateY(-1px);
+}
+.lv-keep-recent {
+  border: 1px solid #e3e5e8;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+.lv-keep-recent:hover {
+  border-color: #c9cdd4;
+}
+.lv-keep-try {
+  border: 1px dashed #c9cdd4;
+  background: transparent;
+}
+.lv-keep-try:hover {
+  border-color: #2f6bff;
+  background: #f7f9ff;
+}
+.lv-keep-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #2f6bff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lv-keep-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.lv-keep-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.lv-keep-text b {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2329;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-keep-text small {
+  font-size: 13px;
+  color: #8a8f98;
+}
+.lv-keep-eyebrow {
+  font-size: 11px !important;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lv-keep-chip-icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+/* 合集卡正面商品图上的降幅 / 券额角标 */
+.lv-cat-tag {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #e5484d;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: Inter, -apple-system, sans-serif;
+}
+/* Chat 商品卡里的优惠券 */
+.lv-wz-coupon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 8px 8px 12px;
+  border: 1px dashed #f0a35e;
+  border-radius: 10px;
+  background: #fff8f1;
+}
+.lv-wz-coupon-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #b4581a;
+}
+.lv-wz-coupon-btn {
+  flex: none;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: #f07c22;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.lv-wz-coupon-btn.is-done {
+  background: #2f9e5b;
+}
+/* 追问 */
+.lv-wz-follow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.lv-wz-follow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid #c9d6ff;
+  border-radius: 999px;
+  background: #f5f8ff;
+  color: #2f55d4;
+  font-size: 14px;
+}
+.lv-wz-follow-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.lv-wz-follow-btn:hover {
+  border-color: #2f55d4;
+  background: #eef2ff;
+}
+
+/* 方案二~四 Chat 页：先不放 Chat Files */
+[data-lv-hero] .home-header button[class*='_root_10a3f_'] {
+  display: none !important;
+}
+/* 方案三、四 Chat 页左上角返回键：回到进入 Chat 前的页面 */
+.lv-back {
+  display: none;
+}
+[data-lv-rail] .lv-back.is-visible {
+  position: fixed;
+  top: 14px;
+  left: 80px;
+  z-index: 955;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #e3e5e8;
+  border-radius: 50%;
+  background: #fff;
+  color: #1f2329;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+[data-lv-rail] .lv-back.is-visible:hover {
+  border-color: #c9cdd4;
+  background: #f7f8fa;
+}
+.lv-back svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------- 方案四首屏标题：migoo finds deals. You save.（简约：一种衬线字体、一种颜色，「You save.」只用斜体） ---------- */
+[data-lv-v4] [class*='_headingGroup_'] h2[class*='_heading_'] {
+  display: none !important;
+}
+.lv-title {
+  margin: 0 0 12px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 52px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  color: #1f2329;
+  text-align: center;
+  animation: lv-title-in 0.8s ease both;
+}
+.lv-title em {
+  font-style: italic;
+}
+@keyframes lv-title-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lv-title {
+    animation: none;
+  }
+}
+
+/* ---------- 方案四：Price drop tracker（卡片版式参考 dupe.com/steals，配色改成浅色） ---------- */
+.lv-tracker {
+  margin-top: 48px;
+}
+.lv-tracker-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.lv-tracker-heading {
+  margin: 0 !important;
+}
+.lv-tracker-sub {
+  font-size: 14px;
+  color: #8a8f98;
+}
+.lv-tracker-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 6px 6px 18px;
+  margin: -6px -6px -18px;
+}
+.lv-tracker-row::-webkit-scrollbar {
+  display: none;
+}
+.lv-steal {
+  flex: none;
+  width: 212px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px 12px;
+  border: 1px solid #e6e8eb;
+  border-radius: 18px;
+  background: #f6f7f9;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.lv-steal:hover {
+  transform: translateY(-3px);
+  border-color: #d5d9df;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+}
+.lv-steal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px 8px;
+}
+.lv-steal-idx {
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #8a8f98;
+}
+.lv-steal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #e2f5f7;
+  color: #0f7c8a;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+.lv-steal-pill::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  background: #36b8c9;
+  border-radius: 1px;
+}
+.lv-steal-img {
+  display: block;
+  height: 176px;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+.lv-steal-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.lv-steal-store {
+  margin: 12px 4px 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8a8f98;
+}
+.lv-steal-title {
+  margin: 4px 4px 0;
+  min-height: 38px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #1f2329;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lv-steal-box {
+  display: block;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e6e8eb;
+  border-radius: 12px;
+  background: #fff;
+}
+.lv-steal-prices {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lv-steal-prices .lv-steal-pill {
+  margin-left: auto;
+  padding: 2px 8px;
+  font-size: 11px;
+}
+.lv-steal-prices b {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2329;
+}
+.lv-steal-prices s {
+  font-size: 13px;
+  color: #a8adb5;
+}
+.lv-steal-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+.lv-steal-save {
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f7c8a;
+}
+.lv-steal-spark {
+  flex: 0 1 84px;
+  min-width: 56px;
+  width: 84px;
+  height: 26px;
+  overflow: visible;
+}
+.lv-steal-spark path {
+  fill: none;
+  stroke: #36b8c9;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.lv-steal-spark circle {
+  fill: #0f7c8a;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+/* 方案四：PDP 从「挤压主页面」改为右侧浮层覆盖（参考 app.wizard.com）——
+   原页面开 PDP 时给内容区加 _bodyWithPdp_（右侧留 420px），这里取消留白；抽屉本身就是 fixed，补阴影并抬到最上层 */
+[data-lv-v4] [class*='_bodyWithPdp_'] {
+  padding-right: 0 !important;
+}
+[data-lv-v4] aside[class*='_drawer_1jl65_'] {
+  z-index: 1001 !important;
+  border-left: 1px solid #eef0f2;
+  box-shadow: -18px 0 48px rgba(15, 23, 42, 0.14);
+}
+/* 抽屉在原页面自己的层叠上下文里，压不过挂在 body 上的插件引导按钮：PDP 打开期间先把按钮藏起来 */
+[data-lv-v4] body:has(aside[class*='_drawer_1jl65_'][class*='_open_']) .lv-ext-float {
+  display: none !important;
+}
+
+/* 方案四 PDP 浮层（Explore 与 Chat 页的 PDP 抽屉都是 _drawer_1jl65_）：贴顶通高；打开时背景压暗（遮罩在抽屉下、窄栏上，点遮罩关闭见 hero.js） */
+[data-lv-v4] aside[class*='_drawer_1jl65_'] {
+  top: 0 !important;
+  height: 100vh !important;
+}
+[data-lv-v4] body:has(aside[class*='_drawer_1jl65_'][class*='_open_'])::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.32);
+  animation: lv-scrim-in 0.25s ease both;
+  cursor: pointer;
+}
+@keyframes lv-scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+.lv-wz-card {
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.lv-wz-card:hover {
+  border-color: #dfe3ea;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1);
+}
+
+/* ---------- Chat：发送动效 + Migoo 思考动画 + 结果依次出现 ---------- */
+.chat-blocks-group.lv-sent {
+  animation: lv-send-up 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: bottom right;
+}
+@keyframes lv-send-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+}
+/* 思考气泡浮在 Chat 输入框上方（位置由 chat-cards.js 计算） */
+.lv-think {
+  position: fixed;
+  z-index: 940;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+  padding: 10px 16px 10px 12px;
+  border-radius: 20px;
+  background: #f1f2f5;
+  font-family: Inter, -apple-system, sans-serif;
+  font-size: 14px;
+  color: #5c6370;
+  animation: lv-think-in 0.35s ease 0.15s both;
+}
+@keyframes lv-think-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+/* 三个小圆点依次起伏 */
+.lv-think-orb {
+  display: inline-flex;
+  gap: 4px;
+}
+.lv-think-orb span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2f6bff;
+  animation: lv-dot 1s ease-in-out infinite;
+}
+.lv-think-orb span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.lv-think-orb span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes lv-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+/* 步骤文案：带一点流光，切换时上浮淡入 */
+.lv-think-text {
+  background: linear-gradient(90deg, #5c6370 0%, #5c6370 40%, #a8b4d6 50%, #5c6370 60%, #5c6370 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: lv-think-shimmer 1.6s linear infinite;
+}
+.lv-think-text.is-in {
+  animation:
+    lv-step-in 0.3s ease,
+    lv-think-shimmer 1.6s linear infinite;
+}
+@keyframes lv-think-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes lv-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+}
+.chat-blocks.lv-reply-in {
+  animation: lv-think-in 0.4s ease both;
+}
+.chat-blocks.lv-reply-in .lv-dd-card {
+  animation: lv-card-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(0.25s + var(--i, 0) * 0.09s);
+}
+.chat-blocks.lv-reply-in .lv-wz-row,
+.chat-blocks.lv-reply-in .lv-wz-follow {
+  animation: lv-think-in 0.4s ease 0.75s both;
+}
+@keyframes lv-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-blocks-group.lv-sent,
+  .lv-think,
+  .chat-blocks.lv-reply-in,
+  .chat-blocks.lv-reply-in .lv-dd-card,
+  .chat-blocks.lv-reply-in .lv-wz-row,
+  .chat-blocks.lv-reply-in .lv-wz-follow {
+    animation: none;
+  }
+}
+
+/* ---------- 方案四：Wonder coupon（版式参考 dupe.com/steals 的 Stackable coupon codes，浅色、横滑单行） ---------- */
+.lv-coupon {
+  position: relative;
+  flex: none;
+  width: 440px;
+  min-height: 176px;
+  display: flex;
+  border: 1px solid #e6e8eb;
+  border-radius: 18px;
+  background: #f6f7f9;
+  scroll-snap-align: start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.lv-coupon:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.1);
+}
+.lv-coupon-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 18px 16px 20px;
+}
+.lv-coupon-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lv-coupon-brand img,
+.lv-coupon-letter {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #fff;
+  flex: none;
+}
+.lv-coupon-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2329;
+}
+.lv-coupon-store {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1f2329;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-coupon-check {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.lv-coupon-big {
+  margin-top: 10px;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -1px;
+  color: #1f2329;
+}
+.lv-coupon-big span {
+  margin-left: 4px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #5c6370;
+}
+.lv-coupon-desc {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #8a8f98;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lv-coupon-timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
+  font-size: 13px;
+  color: #5c6370;
+  font-variant-numeric: tabular-nums;
+}
+.lv-coupon-timer svg {
+  width: 15px;
+  height: 15px;
+}
+/* 右侧券码区：虚线撕口 + 上下两个缺口 */
+.lv-coupon-side {
+  position: relative;
+  width: 158px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 14px;
+  border-left: 2px dashed #d9dde3;
+}
+.lv-coupon-side::before,
+.lv-coupon-side::after {
+  content: '';
+  position: absolute;
+  left: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #e6e8eb;
+}
+.lv-coupon-side::before {
+  top: -9px;
+}
+.lv-coupon-side::after {
+  bottom: -9px;
+}
+.lv-coupon-codelabel {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a8f98;
+}
+.lv-coupon-code {
+  max-width: 100%;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #1f2329;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-coupon-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 38px;
+  border: 0;
+  border-radius: 999px;
+  background: #1f2329;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.lv-coupon-copy:hover {
+  background: #2f6bff;
+}
+.lv-coupon-copy.is-done {
+  background: #2f9e5b;
+}
+.lv-coupon-copy svg {
+  width: 15px;
+  height: 15px;
+}
+/* 券卡上下的缺口会伸出卡片 9px，给横滑行多留一点上下空间 */
+.lv-coupon-row {
+  padding-top: 14px;
+  margin-top: -14px;
+}
+
+/* ---------- 方案四样式分支「多行 · See more」：三个分区改为多行网格，分页由 categories.js 裁高 ---------- */
+[data-lv-layout='grid'] .lv-cats-row,
+[data-lv-layout='grid'] .lv-tracker-row {
+  display: grid;
+  gap: 14px;
+  overflow: hidden;
+  scroll-snap-type: none;
+  transition: max-height 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+[data-lv-layout='grid'] .lv-cats-row {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+[data-lv-layout='grid'] .lv-tracker-row {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+[data-lv-layout='grid'] .lv-coupon-row {
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}
+[data-lv-layout='grid'] .lv-cat,
+[data-lv-layout='grid'] .lv-steal,
+[data-lv-layout='grid'] .lv-coupon {
+  width: auto;
+}
+[data-lv-layout='grid'] .lv-cats-arrow {
+  display: none !important;
+}
+/* 露出的下一行：半透明渐隐蒙层 + See more */
+.lv-more {
+  display: none;
+}
+[data-lv-layout='grid'] .lv-cats-rowwrap.has-more .lv-more {
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  bottom: -24px;
+  height: 120px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.82) 55%, #fff 100%);
+  pointer-events: none;
+}
+.lv-more-btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 18px;
+  border: 1px solid #e3e5e8;
+  border-radius: 999px;
+  background: #fff;
+  color: #1f2329;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.lv-more-btn:hover {
+  border-color: #c9cdd4;
+  transform: translateY(-1px);
+}
+.lv-more-btn svg {
+  width: 16px;
+  height: 16px;
+}
+[data-lv-layout='grid'] .lv-cats-rowwrap.has-more {
+  margin-bottom: 36px;
+}
+
+/* 悬浮球菜单里「方案四样式」分段切换 */
+.lv-menu-seg {
+  margin: 2px 10px 8px 34px;
+}
+.lv-menu-seg-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #8a8f98;
+}
+.lv-menu-seg-group {
+  display: flex;
+  padding: 3px;
+  border-radius: 10px;
+  background: #f1f2f5;
+}
+.lv-menu-seg-btn {
+  flex: 1;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #5c6370;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.lv-menu-seg-btn.is-active {
+  background: #fff;
+  color: #1f2329;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+/* placeholder 轮播：五类标签各自配色 */
+.lv-ph-pct .lv-ph-tag {
+  background: #fdecec;
+  color: #d23b3b;
+}
+.lv-ph-pct .lv-ph-price,
+.lv-ph-drop .lv-ph-price {
+  color: #1f9d55;
+}
+.lv-ph-low .lv-ph-tag {
+  background: #e8efff;
+  color: #2f6bff;
+}
+.lv-ph-low .lv-ph-price {
+  color: #2f6bff;
+}
+.lv-ph-coupon .lv-ph-tag {
+  background: #fff1e4;
+  color: #c4651c;
+}
+.lv-ph-coupon .lv-ph-price {
+  padding: 0 6px;
+  border: 1px dashed #f0a35e;
+  border-radius: 4px;
+  color: #c4651c;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  line-height: 17px;
+}
+.lv-ph-try .lv-ph-tag {
+  background: #f1ebff;
+  color: #7c4dff;
+}
+
+/* 方案四：Explore 图标的分区导航浮层（复用 Recent chats 浮层样式），当前所在分区高亮 */
+[data-lv-v4] .has-explore-flyout .lv-rail-tip {
+  display: none;
+}
+.lv-recent-item.is-current {
+  background: #eef2ff;
+  color: #2f6bff;
+  font-weight: 600;
+}
+
+/* Start here：4 张 TRY THIS 卡等分 4 列，列距与下方合集网格一致（14px），左右边缘对齐 */
+.lv-keep-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  overflow: visible;
+}
+.lv-keep-card {
+  min-width: 0;
+  max-width: none;
+  width: auto;
+}
+
+/* 方案四首屏间距收紧：标题上方留白 20% → 11%；输入框到 Start here、Start here 到合集区各减一截 */
+[data-lv-v4] [class*='_feedHeader_'] {
+  padding-top: calc(var(--lv-hero-h, 820px) * 0.11) !important;
+}
+.lv-keep {
+  /* 原 _feedHeader_ 纵向 flex 自带 32px 间距：输入框（标题下 24px）+ 输入框高 + 20px ≈ 输入框下方留 28px */
+  margin-top: calc(var(--lv-dock-h, 101px) + 20px);
+}
+[data-lv-v4] .lv-cats {
+  margin-top: 0;
+}
+
+/* ======================= 方案五（= 方案四 + 以下差异） ======================= */
+/* 1. 输入框放回页面底部：不放标题下、不吸顶；滚动时照线上原样收成「Ask migoo」胶囊，点开再展开 */
+/* 输入框上方只在选中能力后出二级 query 推荐，一级能力 chips 不常驻（同方案二~四） */
+[data-local-variant='v5'] [class*='_dockLayer_'] .composer-shell__top:not(:has([class*='_queryList_'])),
+[data-local-variant='v5'] [class*='_dockLayer_'] [class*='_closeInput_'] {
+  display: none !important;
+}
+/* 标题下不再有输入框：Start here 直接跟在副标题后面 */
+[data-local-variant='v5'] .lv-keep {
+  margin-top: 4px;
+}
+/* 2. 去掉「What are you shopping for?」（标题 + 合集卡） */
+[data-local-variant='v5'] .lv-cats > .lv-cats-heading:not(.lv-browse-heading),
+[data-local-variant='v5'] .lv-cats > .lv-cats-rowwrap {
+  display: none !important;
+}
+[data-local-variant='v5'] .lv-cats > .lv-tracker:first-of-type {
+  margin-top: 8px;
+}
+/* 3. Wonder coupon 券卡缩小 */
+[data-local-variant='v5'] .lv-coupon {
+  width: 320px;
+  min-height: 0;
+  border-radius: 14px;
+}
+[data-local-variant='v5'] .lv-coupon-main {
+  padding: 12px 12px 12px 14px;
+}
+[data-local-variant='v5'] .lv-coupon-brand img,
+[data-local-variant='v5'] .lv-coupon-letter {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+}
+[data-local-variant='v5'] .lv-coupon-store {
+  font-size: 11px;
+}
+[data-local-variant='v5'] .lv-coupon-check {
+  width: 13px;
+  height: 13px;
+}
+[data-local-variant='v5'] .lv-coupon-big {
+  margin-top: 6px;
+  font-size: 26px;
+}
+[data-local-variant='v5'] .lv-coupon-big span {
+  font-size: 13px;
+}
+[data-local-variant='v5'] .lv-coupon-desc {
+  margin-top: 4px;
+  font-size: 12px;
+  -webkit-line-clamp: 1;
+}
+[data-local-variant='v5'] .lv-coupon-timer {
+  padding-top: 6px;
+  font-size: 11px;
+}
+[data-local-variant='v5'] .lv-coupon-timer svg {
+  width: 12px;
+  height: 12px;
+}
+[data-local-variant='v5'] .lv-coupon-side {
+  width: 112px;
+  gap: 6px;
+  padding: 10px;
+}
+[data-local-variant='v5'] .lv-coupon-side::before,
+[data-local-variant='v5'] .lv-coupon-side::after {
+  left: -7px;
+  width: 12px;
+  height: 12px;
+}
+[data-local-variant='v5'] .lv-coupon-side::before {
+  top: -7px;
+}
+[data-local-variant='v5'] .lv-coupon-side::after {
+  bottom: -7px;
+}
+[data-local-variant='v5'] .lv-coupon-codelabel {
+  font-size: 10px;
+}
+[data-local-variant='v5'] .lv-coupon-code {
+  font-size: 13px;
+}
+[data-local-variant='v5'] .lv-coupon-copy {
+  height: 28px;
+  font-size: 11px;
+}
+[data-local-variant='v5'] .lv-coupon-copy svg {
+  width: 12px;
+  height: 12px;
+}
+[data-local-variant='v5'][data-lv-layout='grid'] .lv-coupon-row {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+/* 多行网格里券卡撑满列宽：列间距与行间距一致（都是 14px），不再留出大块空白 */
+[data-local-variant='v5'][data-lv-layout='grid'] .lv-coupon-row .lv-coupon {
+  width: auto;
+}
+
+/* Big Price Drops 卡片左上角：与用户的关系标签（Watching / Viewed / Saved） */
+.lv-steal-rel {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.lv-steal-rel svg {
+  width: 13px;
+  height: 13px;
+}
+.lv-steal-rel-watching {
+  background: #e8efff;
+  color: #2f6bff;
+}
+.lv-steal-rel-viewed {
+  background: #eef0f3;
+  color: #5c6370;
+}
+.lv-steal-rel-saved {
+  background: #fdebf1;
+  color: #e0457b;
+}
+
+/* Start here 的 TRY THIS 卡强化：每张按图标配一套浅色底 + 实线描边 + 强调色，图标放大进白色圆底，hover 出「Try it →」 */
+.lv-keep-try {
+  --tone: #2f6bff;
+  --tone-bg: #eef3ff;
+  --tone-line: #cfdcff;
+  position: relative;
+  height: 96px;
+  padding: 0 20px;
+  border: 1px solid var(--tone-line);
+  background: linear-gradient(135deg, #fff 0%, var(--tone-bg) 100%);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.lv-keep-try:nth-child(1) {
+  --tone: #b7791f;
+  --tone-bg: #fff4dc;
+  --tone-line: #f3dca6;
+}
+.lv-keep-try:nth-child(2) {
+  --tone: #2f6bff;
+  --tone-bg: #e6efff;
+  --tone-line: #c6d8ff;
+}
+.lv-keep-try:nth-child(3) {
+  --tone: #d4533a;
+  --tone-bg: #ffece6;
+  --tone-line: #fbcdbf;
+}
+.lv-keep-try:nth-child(4) {
+  --tone: #7c4dff;
+  --tone-bg: #f0eaff;
+  --tone-line: #d9ccff;
+}
+.lv-keep-try:hover {
+  transform: translateY(-3px);
+  border-color: var(--tone);
+  background: linear-gradient(135deg, #fff 0%, var(--tone-bg) 100%);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+}
+.lv-keep-try .lv-keep-eyebrow {
+  color: var(--tone) !important;
+  font-weight: 700;
+}
+.lv-keep-try .lv-keep-text b {
+  font-size: 17px;
+  font-weight: 700;
+}
+.lv-keep-icon-wrap {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lv-keep-icon-wrap .lv-keep-chip-icon {
+  width: 32px;
+  height: 32px;
+}
+.lv-keep-try:hover .lv-keep-icon-wrap {
+  transform: scale(1.08) rotate(-6deg);
+}
+.lv-keep-go {
+  position: absolute;
+  left: 20px;
+  bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tone);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.lv-keep-try:hover .lv-keep-go {
+  opacity: 1;
+  transform: none;
+}
+
+/* 方案五底部输入框：滚动一离开顶部就收成原页面的「Ask migoo」胶囊（样式不变），
+   收起 / 展开时机由 variants.js 的 data-lv-compact 决定（不再等原页面滚过头部），
+   切换改为交叉淡入：输入框下沉缩小淡出、胶囊上浮淡入（原页面是瞬间互换，太跳） */
+[data-local-variant='v5'] [class*='_dockLayer_'] [class*='_dockPanel_'] {
+  transition:
+    opacity 0.3s ease,
+    transform 0.4s cubic-bezier(0.22, 0.8, 0.24, 1),
+    visibility 0s linear 0s !important;
+}
+[data-local-variant='v5'] [class*='_dockLayer_'] [class*='_pill_'] {
+  transition:
+    opacity 0.28s ease,
+    transform 0.4s cubic-bezier(0.22, 0.8, 0.24, 1),
+    visibility 0s linear 0.4s !important;
+}
+[data-local-variant='v5'] [class*='_dockLayer_']:not([data-lv-compact]) [class*='_dockPanel_'] {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: none !important;
+  pointer-events: auto !important;
+}
+[data-local-variant='v5'] [class*='_dockLayer_']:not([data-lv-compact]) [class*='_pill_'] {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transform: translate(-50%, 10px) scale(0.92) !important;
+  pointer-events: none !important;
+}
+[data-local-variant='v5'] [class*='_dockLayer_'][data-lv-compact] [class*='_dockPanel_'] {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  transform: translateY(14px) scale(0.97) !important;
+  pointer-events: none !important;
+  transition:
+    opacity 0.22s ease,
+    transform 0.4s cubic-bezier(0.22, 0.8, 0.24, 1),
+    visibility 0s linear 0.4s !important;
+}
+[data-local-variant='v5'] [class*='_dockLayer_'][data-lv-compact] [class*='_pill_'] {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: translateX(-50%) !important;
+  pointer-events: auto !important;
+  transition:
+    opacity 0.3s ease 0.08s,
+    transform 0.4s cubic-bezier(0.22, 0.8, 0.24, 1) 0.04s,
+    visibility 0s linear 0s !important;
+}
+[data-local-variant='v5'] [class*='_dockLayer_'][data-lv-compact] [class*='_dockOverlay_'] {
+  opacity: 0 !important;
+}
+
+/* Big Savings：Claim now 按钮（替代原 COPY），券码打码后字间距略放宽 */
+.lv-coupon-claim {
+  background: #2f6bff;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.lv-coupon-claim:hover {
+  background: #1f55e0;
+}
+.lv-coupon-code {
+  letter-spacing: 0.18em;
+}
+
+/* ---------- Compare Prices 弹窗（compare.js，版式参考 /new-task 的创作弹窗，浅色） ---------- */
+.lv-cmp {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  font-family: Inter, -apple-system, sans-serif;
+}
+.lv-cmp.is-in {
+  opacity: 1;
+}
+.lv-cmp-dialog {
+  display: grid;
+  grid-template-columns: 0.92fr 1.08fr;
+  width: min(980px, 100%);
+  max-height: calc(100vh - 48px);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+  transform: translateY(12px) scale(0.98);
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.lv-cmp.is-in .lv-cmp-dialog {
+  transform: none;
+}
+.lv-cmp-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 28px;
+  padding: 40px 36px;
+  background: radial-gradient(120% 80% at 50% 0%, #fff6dd 0%, #fdf3e3 55%, #fbeedd 100%);
+  border-right: 1px solid #f3ead8;
+}
+.lv-cmp-left-copy {
+  text-align: center;
+}
+.lv-cmp-left-copy h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1f2329;
+}
+.lv-cmp-left-copy p {
+  margin: 0 auto;
+  max-width: 340px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #6b7079;
+}
+.lv-cmp-art {
+  position: relative;
+  height: 270px;
+}
+.lv-cmp-art-card {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  width: 150px;
+  padding: 10px 10px 0;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #efe6d4;
+  box-shadow: 0 10px 28px rgba(120, 90, 30, 0.14);
+}
+.lv-cmp-art-card > img {
+  display: block;
+  width: 100%;
+  height: 132px;
+  object-fit: contain;
+}
+.lv-cmp-art-l {
+  transform: translateX(-138%) rotate(-8deg);
+  opacity: 0.92;
+}
+.lv-cmp-art-r {
+  transform: translateX(38%) rotate(8deg);
+  opacity: 0.92;
+}
+.lv-cmp-art-c {
+  top: 0;
+  z-index: 1;
+  width: 170px;
+  transform: translateX(-50%);
+  border-color: #f2c95c;
+  box-shadow: 0 16px 36px rgba(160, 110, 10, 0.22);
+}
+.lv-cmp-art-c > img {
+  height: 160px;
+}
+.lv-cmp-art-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 2px 12px;
+  font-size: 12px;
+  color: #6b7079;
+}
+.lv-cmp-art-logo {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+.lv-cmp-art-store {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-cmp-art-foot b {
+  font-size: 14px;
+  color: #1f2329;
+}
+.lv-cmp-art-c .lv-cmp-art-foot b {
+  color: #0f9d58;
+}
+.lv-cmp-art-tag {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #0f9d58;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.lv-cmp-right {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 36px 36px 0;
+  overflow-y: auto;
+}
+.lv-cmp-right h2 {
+  margin: 0 0 24px;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: #1f2329;
+}
+.lv-cmp-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: #f2f3f5;
+  color: #4e5969;
+  cursor: pointer;
+}
+.lv-cmp-close:hover {
+  background: #e5e6eb;
+}
+.lv-cmp-close svg,
+.lv-cmp-picked-x svg {
+  width: 16px;
+  height: 16px;
+}
+.lv-cmp-label {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2329;
+}
+.lv-cmp-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 52px;
+  padding: 0 6px 0 16px;
+  border: 1px solid #e3e5e8;
+  border-radius: 14px;
+  background: #fafbfc;
+  color: #8a8f98;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lv-cmp-field:focus-within {
+  border-color: #2f6bff;
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12);
+  background: #fff;
+}
+.lv-cmp-field.is-bad {
+  border-color: #f53f3f;
+}
+.lv-cmp-field > svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+.lv-cmp-link {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  color: #1f2329;
+}
+.lv-cmp-sep {
+  width: 1px;
+  height: 24px;
+  background: #e3e5e8;
+}
+.lv-cmp-upload {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2329;
+  cursor: pointer;
+}
+.lv-cmp-upload:hover {
+  background: #f2f3f5;
+}
+.lv-cmp-upload svg {
+  width: 17px;
+  height: 17px;
+}
+.lv-cmp-picked {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 10px 10px 10px;
+  border: 1px solid #c9d8ff;
+  border-radius: 14px;
+  background: #f5f8ff;
+}
+.lv-cmp-picked > img {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #fff;
+}
+.lv-cmp-picked-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.lv-cmp-picked-text b {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2329;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-cmp-picked-text small {
+  font-size: 13px;
+  color: #6b7079;
+}
+.lv-cmp-picked-x {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #6b7079;
+  cursor: pointer;
+}
+.lv-cmp-picked-x:hover {
+  background: #e8eefc;
+}
+.lv-cmp-suggest {
+  margin-top: 12px;
+}
+.lv-cmp-suggest > span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #8a8f98;
+}
+.lv-cmp-suggest-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lv-cmp-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 200px;
+  height: 34px;
+  padding: 0 12px 0 4px;
+  border: 1px solid #e3e5e8;
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  color: #1f2329;
+  cursor: pointer;
+}
+.lv-cmp-chip:hover {
+  border-color: #2f6bff;
+  background: #f7f9ff;
+}
+.lv-cmp-chip img {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: #f5f6f7;
+}
+.lv-cmp-chip span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-cmp-label-gap {
+  margin-top: 26px;
+}
+.lv-cmp-box {
+  position: relative;
+  border: 1px solid #e3e5e8;
+  border-radius: 14px;
+  background: #fafbfc;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lv-cmp-box:focus-within {
+  border-color: #2f6bff;
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12);
+  background: #fff;
+}
+.lv-cmp-note {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px 6px;
+  border: 0;
+  outline: 0;
+  resize: none;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1f2329;
+}
+.lv-cmp-note::placeholder,
+.lv-cmp-link::placeholder {
+  color: #a0a5ad;
+}
+.lv-cmp-opts {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 12px 12px;
+}
+.lv-cmp-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px 0 12px;
+  border: 1px solid #e3e5e8;
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  color: #1f2329;
+  cursor: pointer;
+}
+.lv-cmp-opt:hover,
+.lv-cmp-opt.is-open {
+  border-color: #c9cdd4;
+  background: #f7f8fa;
+}
+.lv-cmp-opt svg {
+  width: 16px;
+  height: 16px;
+  color: #4e5969;
+}
+.lv-cmp-opt svg:last-child {
+  width: 14px;
+  height: 14px;
+  color: #8a8f98;
+  transition: transform 0.15s ease;
+}
+.lv-cmp-opt.is-open svg:last-child {
+  transform: rotate(180deg);
+}
+.lv-cmp-menu {
+  position: absolute;
+  bottom: calc(100% - 2px);
+  z-index: 2;
+  min-width: 200px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid #e3e5e8;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+}
+.lv-cmp-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: #1f2329;
+  text-align: left;
+  cursor: pointer;
+}
+.lv-cmp-menu-item:hover {
+  background: #f2f3f5;
+}
+.lv-cmp-menu-item > span:nth-child(2) {
+  flex: 1;
+}
+.lv-cmp-menu-check {
+  display: flex;
+  width: 16px;
+  color: #2f6bff;
+  visibility: hidden;
+}
+.lv-cmp-menu-check svg {
+  width: 16px;
+  height: 16px;
+}
+.lv-cmp-menu-item.is-on .lv-cmp-menu-check {
+  visibility: visible;
+}
+.lv-cmp-menu-all {
+  border-bottom: 1px solid #f0f1f3;
+  border-radius: 8px 8px 0 0;
+}
+.lv-cmp-menu-logo {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+.lv-cmp-foot {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin: 28px -36px 0;
+  padding: 18px 36px 24px;
+  border-top: 1px solid #f0f1f3;
+  background: #fff;
+}
+.lv-cmp-go {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 26px;
+  border: 0;
+  border-radius: 14px;
+  background: #2f6bff;
+  color: #fff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.lv-cmp-go:hover {
+  background: #1f5af0;
+}
+.lv-cmp-go:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.lv-cmp-go svg {
+  width: 18px;
+  height: 18px;
+}
+@media (max-width: 760px) {
+  .lv-cmp-dialog {
+    grid-template-columns: 1fr;
+  }
+  .lv-cmp-left {
+    display: none;
+  }
+}
+
+/* 会话页：领取成功的券卡，放在商品卡轮播上方（券码完整显示 + Copy） */
+.lv-wz-lead {
+  margin: 14px 0 4px;
+  padding-top: 9px;
+}
+.lv-wz-lead .lv-coupon {
+  width: 440px;
+  max-width: 100%;
+}
+.lv-wz-lead .lv-coupon:hover {
+  transform: none;
+  box-shadow: none;
+}
+.lv-wz-lead .lv-coupon-code {
+  letter-spacing: 0.05em;
+}
+/* 和 Explore 上的券卡一致：同宽（方案五 320px）、蓝色按钮、不大写 */
+[data-local-variant='v5'] .lv-wz-lead .lv-coupon {
+  width: 320px;
+}
+.lv-wz-lead .lv-coupon-copy {
+  background: #2f6bff;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.lv-wz-lead .lv-coupon-copy:hover {
+  background: #1f55e0;
+}
+
+/* Compare 弹窗 v2：Product 是主体（大投放区 + 看过的商品方块），补充要求缩成一行小输入框 */
+.lv-cmp-right h2 {
+  margin-bottom: 22px;
+}
+.lv-cmp-label {
+  font-size: 15px;
+}
+.lv-cmp-product {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border: 1.5px dashed #c9d3e6;
+  border-radius: 18px;
+  background: #f7f9fd;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.lv-cmp-product.is-over {
+  border-color: #2f6bff;
+  background: #eef3ff;
+}
+.lv-cmp-product.is-picked {
+  padding: 14px;
+  border-style: solid;
+  border-color: #c9d8ff;
+  background: #f5f8ff;
+}
+.lv-cmp-field {
+  height: 54px;
+  padding: 0 16px;
+  background: #fff;
+}
+.lv-cmp-or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: #a0a5ad;
+}
+.lv-cmp-or::before,
+.lv-cmp-or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e3e7ef;
+}
+.lv-cmp-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 64px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #4e5969;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.lv-cmp-drop:hover {
+  background: #eef2fa;
+}
+.lv-cmp-drop svg {
+  width: 20px;
+  height: 20px;
+  color: #2f6bff;
+}
+.lv-cmp-drop u {
+  color: #2f6bff;
+  font-weight: 600;
+  text-decoration: none;
+}
+.lv-cmp-picked {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  gap: 16px;
+}
+.lv-cmp-picked > img {
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
+  border: 1px solid #e6ecf8;
+}
+.lv-cmp-picked-text {
+  gap: 4px;
+}
+.lv-cmp-picked-eyebrow {
+  font-size: 12px !important;
+  font-weight: 600;
+  color: #2f6bff !important;
+}
+.lv-cmp-picked-text b {
+  font-size: 15px;
+  line-height: 1.4;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.lv-cmp-picked-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1f2329;
+}
+.lv-cmp-picked-x {
+  align-self: flex-start;
+}
+.lv-cmp-suggest {
+  margin-top: 16px;
+}
+.lv-cmp-suggest-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.lv-cmp-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding: 8px 8px 10px;
+  border: 1px solid #e6e8eb;
+  border-radius: 14px;
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lv-cmp-tile:hover {
+  border-color: #c9cdd4;
+}
+.lv-cmp-tile.is-on {
+  border-color: #2f6bff;
+  box-shadow: 0 0 0 2px rgba(47, 107, 255, 0.18);
+}
+.lv-cmp-tile img {
+  width: 100%;
+  height: 64px;
+  object-fit: contain;
+  margin-bottom: 2px;
+}
+.lv-cmp-tile-name {
+  width: 100%;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #4e5969;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lv-cmp-tile b {
+  font-size: 13px;
+  color: #1f2329;
+}
+.lv-cmp-extra {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lv-cmp-extra .lv-cmp-note {
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #e3e5e8;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  line-height: 40px;
+  transition: border-color 0.15s ease;
+}
+.lv-cmp-extra .lv-cmp-note:focus {
+  border-color: #2f6bff;
+}
+.lv-cmp-extra .lv-cmp-opts {
+  padding: 0;
+  gap: 6px;
+}
+.lv-cmp-extra .lv-cmp-opt {
+  height: 30px;
+  padding: 0 8px 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #4e5969;
+}
+.lv-cmp-extra .lv-cmp-opt svg {
+  width: 14px;
+  height: 14px;
+}
+.lv-cmp-extra .lv-cmp-menu {
+  bottom: calc(100% + 6px);
+}
+
+/* ---------- Start here 其余三张卡的弹窗（try-this.js）：左侧配色跟各自的卡片一致 ---------- */
+.lv-try-track .lv-cmp-left {
+  background: radial-gradient(120% 80% at 50% 0%, #eef4ff 0%, #e8f0ff 55%, #e1eafc 100%);
+  border-right-color: #e1e9f8;
+}
+.lv-try-budget .lv-cmp-left {
+  background: radial-gradient(120% 80% at 50% 0%, #fff3f0 0%, #ffece7 55%, #fde3dc 100%);
+  border-right-color: #f8e3dd;
+}
+.lv-try-ideas .lv-cmp-left {
+  background: radial-gradient(120% 80% at 50% 0%, #f5f2ff 0%, #efeaff 55%, #e7e0fd 100%);
+  border-right-color: #e9e4f8;
+}
+.lv-try-ideas .lv-cmp-art-c {
+  border-color: #b9a6f5;
+}
+.lv-try-ideas .lv-cmp-art-tag {
+  background: #7c5cf0;
+}
+.lv-try-ideas .lv-cmp-art-c .lv-cmp-art-foot b {
+  color: #1f2329;
+}
+.lv-try-body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 通用：单选胶囊 */
+.lv-try-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.lv-try-pill {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #e3e5e8;
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  color: #4e5969;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.lv-try-pill:hover:not(:disabled) {
+  border-color: #c9cdd4;
+}
+.lv-try-pill.is-on {
+  border-color: #2f6bff;
+  background: #eef3ff;
+  color: #2f6bff;
+  font-weight: 600;
+}
+.lv-try-pill:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Track：目标价 */
+.lv-trk-target-row {
+  margin-top: 22px;
+}
+.lv-trk-input-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.lv-trk-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 150px;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid #e3e5e8;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2329;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lv-trk-input:focus-within {
+  border-color: #2f6bff;
+  box-shadow: 0 0 0 3px rgba(47, 107, 255, 0.12);
+}
+.lv-trk-input input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  -moz-appearance: textfield;
+}
+.lv-trk-input input::-webkit-outer-spin-button,
+.lv-trk-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.lv-trk-input input::placeholder {
+  font-size: 15px;
+  font-weight: 400;
+  color: #a0a5ad;
+}
+
+/* Budget / Ideas：主区（想买什么 / 送给谁） */
+.lv-try-main {
+  border-style: solid;
+  border-color: #e6e9f0;
+  background: #f8f9fb;
+  gap: 14px;
+}
+.lv-try-cats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.lv-try-cat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  height: 52px;
+  padding: 0 12px 0 8px;
+  border: 1px solid #e6e8eb;
+  border-radius: 14px;
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2329;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.lv-try-cat:hover {
+  border-color: #c9cdd4;
+}
+.lv-try-cat.is-on {
+  border-color: #2f6bff;
+  background: #f5f8ff;
+  box-shadow: 0 0 0 2px rgba(47, 107, 255, 0.16);
+}
+.lv-try-cat > span:last-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-try-emoji {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #f2f4f7;
+  font-size: 19px;
+}
+.lv-try-who .lv-try-cat {
+  height: 64px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.lv-try-who .lv-try-emoji {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 22px;
+}
+.lv-try-occ {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lv-try-occ-label {
+  font-size: 12px;
+  color: #8a8f98;
+}
+
+/* Budget：预算 */
+.lv-bdg {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lv-bdg-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.lv-bdg-top .lv-cmp-label {
+  margin: 0;
+}
+.lv-bdg-amt {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #1f2329;
+}
+.lv-bdg-amt small {
+  margin-right: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #8a8f98;
+}
+.lv-bdg-range {
+  --p: 50%;
+  width: 100%;
+  height: 6px;
+  margin: 4px 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2f6bff var(--p), #e5e8ee var(--p));
+  -webkit-appearance: none;
+  appearance: none;
+  outline: 0;
+  cursor: pointer;
+}
+.lv-bdg-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #2f6bff;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(47, 107, 255, 0.3);
+}
+.lv-bdg-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 3px solid #2f6bff;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* 左侧示意图：Track（走势卡 + 降价通知）/ Budget（预算卡） */
+.lv-art-trk {
+  position: absolute;
+  top: 34px;
+  left: 50%;
+  width: 260px;
+  transform: translateX(-50%);
+  padding: 14px 14px 10px;
+  border: 1px solid #dfe7f7;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(40, 80, 160, 0.14);
+}
+.lv-art-trk-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.lv-art-trk-head img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #f5f7fb;
+}
+.lv-art-trk-head div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.lv-art-trk-head small {
+  font-size: 12px;
+  color: #6b7079;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-art-trk-head b {
+  font-size: 18px;
+  color: #1f2329;
+}
+.lv-art-trk svg {
+  display: block;
+  width: 100%;
+  height: 80px;
+}
+.lv-trk-line {
+  fill: none;
+  stroke: #2f6bff;
+  stroke-width: 2.2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.lv-trk-target {
+  fill: none;
+  stroke: #0f9d58;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+  vector-effect: non-scaling-stroke;
+}
+.lv-art-note {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 250px;
+  transform: translateX(-38%);
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #1f2329;
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+}
+.lv-art-note svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: #ffd25e;
+}
+.lv-art-note span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.lv-art-note b {
+  font-size: 13px;
+}
+.lv-art-note small {
+  font-size: 12px;
+  color: #c9cdd4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-art-bdg {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  width: 270px;
+  transform: translateX(-50%);
+  padding: 16px;
+  border: 1px solid #f3dcd5;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(170, 80, 50, 0.14);
+}
+.lv-art-bdg-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.lv-art-bdg-top small {
+  font-size: 12px;
+  color: #6b7079;
+}
+.lv-art-bdg-top b {
+  font-size: 22px;
+  color: #1f2329;
+}
+.lv-art-bdg-bar {
+  height: 8px;
+  margin: 10px 0 12px;
+  border-radius: 999px;
+  background: #f3f4f6;
+  overflow: hidden;
+}
+.lv-art-bdg-bar i {
+  display: block;
+  width: 72%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff9a7a, #f5643d);
+}
+.lv-art-bdg-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-top: 1px solid #f3f4f6;
+  font-size: 12px;
+  color: #4e5969;
+}
+.lv-art-bdg-row img {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f7f8fa;
+}
+.lv-art-bdg-row span {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-art-bdg-row b {
+  font-size: 13px;
+  color: #0f9d58;
+}
+
+/* 会话页：降价提醒卡（商品卡上方） */
+.lv-trk {
+  width: 440px;
+  max-width: 100%;
+  padding: 16px 16px 12px;
+  border: 1px solid #e6e8eb;
+  border-radius: 18px;
+  background: #fff;
+  font-family: Inter, -apple-system, sans-serif;
+}
+.lv-trk-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lv-trk-head img {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #f7f8fa;
+}
+.lv-trk-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lv-trk-title small {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f9d58;
+}
+.lv-trk-title b {
+  font-size: 14px;
+  color: #1f2329;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-trk-live {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef3ff;
+  font-size: 12px;
+  font-weight: 600;
+  color: #2f6bff;
+}
+.lv-trk-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 14px 0 10px;
+}
+.lv-trk-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #f6f7f9;
+}
+.lv-trk-stat small {
+  font-size: 11px;
+  color: #8a8f98;
+}
+.lv-trk-stat b {
+  font-size: 16px;
+  color: #1f2329;
+}
+.lv-trk-stat.is-target {
+  background: #ecf8f1;
+}
+.lv-trk-stat.is-target b {
+  color: #0f9d58;
+}
+.lv-trk-chart {
+  display: block;
+  width: 100%;
+  height: 72px;
+}
+.lv-trk-foot {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #8a8f98;
+}
+
+/* 会话页：单件商品的电商大卡（Figma 草稿箱 2057-2063） */
+.lv-wz-single .lv-wz-arrow {
+  display: none;
+}
+.lv-big {
+  flex: none;
+  width: 300px;
+  scroll-snap-align: start;
+  transition: box-shadow 0.2s ease;
+  max-width: 100%;
+  /* 视觉稿：1px 20% 透明度的灰色描边 */
+  border: 1px solid rgba(142, 142, 147, 0.2);
+  border-radius: 14px;
+  background: #f7f8fa;
+  overflow: hidden;
+  cursor: pointer;
+}
+.lv-big-media {
+  aspect-ratio: 1.22;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px 14px 0 0;
+  overflow: hidden;
+}
+.lv-big-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.25s ease;
+}
+.lv-big:hover .lv-big-media img {
+  transform: scale(1.03);
+}
+.lv-big-body {
+  padding: 14px 16px 16px;
+}
+.lv-big-title {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #1f2329;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lv-big-sub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7079;
+}
+.lv-big-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #dcdfe4;
+}
+.lv-big-price b {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2329;
+}
+.lv-big-price s {
+  font-size: 13px;
+  color: #a8adb5;
+}
+.lv-big-buy {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1677ff;
+  text-decoration: none;
+}
+.lv-big-buy:hover {
+  text-decoration: underline;
+}
+.lv-big:hover {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+/* 方案四/五 会话页：内容列从 800px 放宽到 1040px，两侧留白收窄（消息列、输入框一起放宽） */
+[data-lv-v4] [class*='_messageContentTrack_'] {
+  max-width: 1040px;
+}
+/* 原样式选择器更具体，这里用 !important 盖过 */
+[data-lv-v4] .home-composer-panel {
+  max-width: 1088px !important;
+}
+[data-lv-v4] .home-composer-panel .composer-shell {
+  max-width: 1040px;
+}
+
+/* 会话页商品卡：参考 Daydream（daydream.ing 会话结果） */
+.lv-wz-track.lv-dd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  overflow: visible;
+  padding: 0;
+  margin: 0;
+}
+.lv-dd-card {
+  min-width: 0;
+  border: 1px solid rgba(142, 142, 147, 0.2);
+  border-radius: 16px;
+  background: #fff;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+.lv-dd-card:hover {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+.lv-dd-media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* 商品图多为白底，正片叠底融进灰底 */
+.lv-dd-media img {
+  width: 76%;
+  height: 76%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  transition: transform 0.3s ease;
+}
+.lv-dd-card:hover .lv-dd-media img {
+  transform: scale(1.04);
+}
+.lv-dd-btn {
+  position: absolute;
+  top: 10px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  color: #4e5969;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.lv-dd-btn:hover {
+  background: #fff;
+}
+.lv-dd-btn svg {
+  width: 17px;
+  height: 17px;
+}
+.lv-dd-more {
+  left: 10px;
+}
+.lv-dd-heart {
+  right: 10px;
+}
+.lv-dd-heart.is-on {
+  color: #f53f5f;
+}
+.lv-dd-heart.is-on svg path {
+  fill: currentColor;
+}
+.lv-dd-tag {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  max-width: calc(100% - 20px);
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 600;
+  color: #1f2329;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-dd-body {
+  padding: 12px 14px 14px;
+}
+.lv-dd-brand {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+  color: #1f2329;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-dd-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 13px;
+}
+.lv-dd-title {
+  flex: 1;
+  min-width: 0;
+  color: #4e5969;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-dd-price {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.lv-dd-price s {
+  color: #8a8f98;
+}
+.lv-dd-price b {
+  font-weight: 600;
+  color: #1f2329;
+}
+
+/* Big Price Drops 卡：电商大卡样式（同会话里的 Figma 大卡），保留走势线；覆盖上面的旧卡样式 */
+.lv-steal {
+  padding: 0;
+  border: 1px solid rgba(142, 142, 147, 0.2);
+  border-radius: 14px;
+  background: #f7f8fa;
+  overflow: hidden;
+}
+.lv-steal:hover {
+  border-color: rgba(142, 142, 147, 0.2);
+}
+.lv-steal-img {
+  position: relative;
+  height: auto;
+  aspect-ratio: 1.22;
+  border-radius: 0;
+}
+.lv-steal-img img {
+  padding: 14px;
+}
+.lv-steal-body .lv-steal-rel {
+  align-self: flex-start;
+  margin-bottom: 8px;
+}
+.lv-steal-body {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px 14px;
+}
+.lv-steal-body .lv-steal-title {
+  display: block;
+  margin: 0;
+  min-height: 0;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.lv-steal-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7079;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-steal-body .lv-steal-prices {
+  margin-top: 8px;
+}
+.lv-steal-body .lv-steal-prices b {
+  font-size: 18px;
+}
+.lv-steal-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+.lv-steal-chart .lv-steal-spark {
+  flex: 1;
+  width: auto;
+  height: 30px;
+}
+.lv-steal-chart-label {
+  flex: none;
+  font-size: 11px;
+  color: #a8adb5;
+}
+/* 卡片宽度固定 260px：横滑同宽；多行网格按 260px 一列，多余空间均分到列间 */
+.lv-steal {
+  width: 260px;
+}
+[data-lv-layout='grid'] .lv-tracker-row:not(.lv-coupon-row) {
+  grid-template-columns: repeat(auto-fill, 260px);
+  justify-content: space-between;
+}
+.lv-steal-rel-none {
+  visibility: hidden;
+}

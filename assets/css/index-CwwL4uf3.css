@@ -1,0 +1,1 @@
+.chat-detail-mobile{display:flex;flex-direction:column;height:100vh;height:100dvh;width:100%;background:#fff;overflow:hidden}.chat-detail-mobile--loading,.chat-detail-mobile--error{justify-content:center;align-items:center}.chat-detail-mobile--error{color:#666;font-size:14px}
