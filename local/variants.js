@@ -94,17 +94,19 @@
   markLayout(v4Layout());
 
   // 方案四输入框分支（localStorage local:v6-dock）：auto = 自动（顶部展开、离开顶部收成胶囊）；
-  // collapsed = 收起（默认；任何位置都只露右下角「Ask migoo」胶囊，输入都在右侧会话窗里进行）
+  // collapsed = 收起（任何位置都只露右下角「Ask Okiee」胶囊，输入都在右侧会话窗里进行）；
+  // line = 单行（默认；参考 daydream.ing：底部常驻一条单行胶囊输入框，不收起，点进去展开成双行）
   var V6_DOCKS = [
     { id: "auto", name: "自动" },
     { id: "collapsed", name: "收起" },
+    { id: "line", name: "单行" },
   ];
   function v6Dock() {
     var v = null;
     try {
       v = localStorage.getItem("local:v6-dock");
     } catch (e) {}
-    return v === "auto" ? v : "collapsed";
+    return v === "auto" || v === "collapsed" ? v : "line";
   }
   function setV6Dock(id) {
     try {
@@ -283,6 +285,7 @@
 
   /* ---------- 方案二：顶栏 ---------- */
   var EXT_URL = "https://chromewebstore.google.com/";
+  window.lvExtUrl = EXT_URL;
   var CHROME_LOGO =
     '<svg class="lv-ext-logo" viewBox="0 0 48 48" aria-hidden="true">' +
     '<path fill="#db4437" d="M24 4a20 20 0 0 1 17.3 10H24a10 10 0 0 0-9.4 6.6L8.2 9.5A20 20 0 0 1 24 4Z"/>' +
@@ -419,7 +422,11 @@
       // 方案四：只按滚动位置决定——回到顶部展开成中间的输入框，离开顶部缩成右下角胶囊；
       // 胶囊状态下不会因为挂了引用、获得焦点而展开（唤醒走右侧会话窗，见 drawer.js）
       if (current() === "v6") {
-        if (v6Dock() === "collapsed") layer.dataset.lvCompact = "1";
+        root.toggleAttribute("data-lv-dock-line", v6Dock() === "line");
+        // 单行输入框点进去（聚焦）、或有输入 / 挂了引用 / 开着菜单时，展开成平时的双行输入框；空闲了再缩回单行
+        layer.toggleAttribute("data-lv-line-active", v6Dock() === "line" && !isDockIdle(panel));
+        if (v6Dock() === "line") delete layer.dataset.lvCompact;
+        else if (v6Dock() === "collapsed") layer.dataset.lvCompact = "1";
         else if (top <= minTop) delete layer.dataset.lvCompact;
         // 方案四：离开顶部就收成胶囊（输入框聚焦但没内容也收；有字或有引用时保持展开）
         else if (!layer.dataset.lvCompact && isDockIdle(panel, true)) {
@@ -545,8 +552,17 @@
       while (track.children.length > 1) track.removeChild(track.firstChild);
     }, 450);
   }
+  // 输入框聚焦标记（推广文案渐隐用）：用 focusin / focusout 打，不依赖 :focus-within（窗口不在前台时它不生效）
+  function markFocus(e) {
+    var host = e.target.closest && e.target.closest(".composer-shell__editor-host");
+    if (host) host.toggleAttribute("data-lv-focus", e.type === "focusin");
+  }
+  document.addEventListener("focusin", markFocus);
+  document.addEventListener("focusout", markFocus);
   function tickPh() {
     if (!phEl || !drops.length || phStopped || document.hidden) return;
+    // 输入框聚焦时文案已渐隐，不再轮播（失焦后接着轮）
+    if (phEl.parentNode && phEl.parentNode.contains(document.activeElement)) return;
     phIndex = (phIndex + 1) % drops.length;
     rollPh(phLine(drops[phIndex]));
   }
@@ -573,8 +589,10 @@
     var popoverOpen = document.querySelector(
       ".ant-popover:not(.ant-popover-hidden), .ant-dropdown:not(.ant-dropdown-hidden)",
     );
+    // 输入坞里的插件引导卡不算「在用输入框」
+    var focusIn = panel.contains(document.activeElement) && !document.activeElement.closest(".lv-ext-promo");
     if (ignoreFocus) return empty && !headerFilled && !popoverOpen;
-    return empty && !headerFilled && !panel.contains(document.activeElement) && !popoverOpen;
+    return empty && !headerFilled && !focusIn && !popoverOpen;
   }
   // 展开收起的底部输入框并聚焦（方案四右下角的 Ask migoo 胶囊也调这个）
   window.lvExpandDock = function () {

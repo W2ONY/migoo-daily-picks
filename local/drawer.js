@@ -22,6 +22,46 @@
     return window.LV_BASE || "";
   }
 
+  /* ---------- 输入框右上角的小弧线（会话窗、Explore 底部输入框共用） ----------
+   * Explore 输入框：平时是一段贴着圆角的灰色短弧线，hover 变成指向右上角的单侧放大箭头并提示「Visit agent」，点了拉开右侧会话窗；
+   * 会话窗里的输入框不再放大：常驻反向的缩小箭头——侧边时点了收起会话窗，全屏时点了缩回侧边（见外层的 lvDrawerArc） */
+  var ARC_PATH = {
+    line: '<path d="M8 5a11 11 0 0 1 11 11"/>',
+    expand: '<path d="M11 5h8v8M19 5l-9 9"/>',
+    shrink: '<path d="M13 19H5v-8M5 19l9-9"/>',
+  };
+  function arcSvg(cls, path) {
+    return '<svg class="' + cls + '" viewBox="0 0 24 24" aria-hidden="true">' + path + "</svg>";
+  }
+  // shrink 为空 = 放大箭头（Visit agent）；否则常驻缩小箭头，shrink 是它的提示文字
+  function mountArc(body, shrink, onClick) {
+    if (!body) return;
+    var btn = body.querySelector(":scope > .lv-agent-arc");
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "lv-agent-arc";
+      btn.innerHTML = arcSvg("lv-arc-line", ARC_PATH.line) + arcSvg("lv-arc-icon", "");
+      // 不抢输入框焦点，也不让输入框自己的点击逻辑接到
+      btn.addEventListener("mousedown", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick();
+      });
+      body.appendChild(btn);
+    }
+    if (btn._shrink === shrink) return;
+    btn._shrink = shrink;
+    btn.classList.toggle("is-full", !!shrink);
+    btn.querySelector(".lv-arc-icon").innerHTML = shrink ? ARC_PATH.shrink : ARC_PATH.expand;
+    btn.setAttribute("data-tip", shrink || "Visit agent");
+    btn.setAttribute("aria-label", shrink || "Visit agent");
+  }
+
   /* ======================= 嵌入页（会话窗里的 iframe） ======================= */
   if (root.hasAttribute("data-lv-embed")) {
     // 会话页输入框的作用域就是会话 id（chat/initial 返回的 id）
@@ -90,6 +130,22 @@
     window.lvEmbedReady = function () {
       return !!composer();
     };
+    // 把文字放进会话输入框（不发送）：从 Explore 输入框点小弧线拉开会话窗时带过来
+    window.lvEmbedFill = function (text) {
+      var editor = composer();
+      if (!editor || !text) return;
+      editor.focus();
+      document.execCommand("selectAll", false);
+      document.execCommand("insertText", false, text);
+    };
+    // 会话输入框右上角：常驻缩小箭头，提示随外层会话窗模式（侧边 = 收起会话窗，全屏 = 缩回侧边）
+    setInterval(function () {
+      var p = window.parent;
+      var full = !!(p && p.lvDrawerMode && p.lvDrawerMode() === "full");
+      mountArc(document.querySelector(".home-composer-panel .composer-shell__body"), full ? "Exit full screen" : "Collapse", function () {
+        if (p && p.lvDrawerArc) p.lvDrawerArc();
+      });
+    }, 300);
     return;
   }
 
@@ -105,6 +161,7 @@
   // drawerReturn = 会话窗被 PDP 顶掉前的模式（关 PDP 时恢复）；pdpReturn = 被会话窗顶掉的 PDP 参数（关会话窗时重开）
   var drawerReturn = null;
   var pdpReturn = null;
+
   var ICON = {
     chat: '<path d="M5 18.5V7a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 7v6.5a2.5 2.5 0 0 1-2.5 2.5H9z"/><path d="M9 9.5h6M9 12.5h4"/>',
     expand: '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>',
@@ -129,8 +186,10 @@
       '<button type="button" class="lv-drawer-btn lv-drawer-close" aria-label="Close">' +
       svg(ICON.close) +
       "</button></span></div>" +
-      '<div class="lv-drawer-body"><div class="lv-drawer-loading"><span></span><span></span><span></span></div></div>';
+      '<div class="lv-drawer-body"><div class="lv-drawer-loading"><span></span><span></span><span></span></div></div>' +
+      '<div class="lv-drawer-resize" aria-hidden="true"></div>';
     drawer.querySelector(".lv-drawer-close").onclick = close;
+    bindDrag();
     drawer.querySelector(".lv-drawer-size").onclick = function () {
       setMode(mode === "full" ? "open" : "full");
     };
@@ -144,6 +203,123 @@
       open();
     };
     document.body.appendChild(tab);
+  }
+  /* ---------- 侧边会话窗可拖动 + 边缘吸附：拖标题栏左右挪，松手吸到最近的一侧（左边缘贴着窄栏、或右边缘）；拖内侧边缘改宽度 ----------
+   * 只在侧边模式（非全屏）生效；每次拉开都从右侧弹出（吸到左边只在这次打开期间有效），宽度记在 localStorage；
+   * 双击标题栏复位到右侧默认宽度 */
+  var GEOM_KEY = "local:drawer-geom";
+  var EDGE = 12; // 与窗口边缘、左侧窄栏之间留的空
+  var RAIL = 64;
+  var geom = null; // { side: "left" | "right", width }
+  function loadGeom() {
+    try {
+      geom = JSON.parse(localStorage.getItem(GEOM_KEY) || "null");
+    } catch (e) {
+      geom = null;
+    }
+    if (geom && !(geom.width > 0)) geom = null;
+    // 不记停靠边：打开页面时一律从右侧
+    if (geom) geom.side = "right";
+  }
+  // 每次拉开都从右侧弹出：上次停在左边就先（无过渡地）挪回右侧外面再滑进来
+  function resetSide() {
+    if (!drawer || !geom || geom.side !== "left") return;
+    drawer.classList.add("is-dragging");
+    geom.side = "right";
+    applyGeom();
+    void drawer.offsetWidth;
+    drawer.classList.remove("is-dragging");
+  }
+  function saveGeom() {
+    try {
+      if (geom) localStorage.setItem(GEOM_KEY, JSON.stringify(geom));
+      else localStorage.removeItem(GEOM_KEY);
+    } catch (e) {}
+  }
+  function clampWidth(w) {
+    return Math.max(340, Math.min(w, window.innerWidth - RAIL - EDGE * 2));
+  }
+  // 停靠在哪一侧 → right 值：右侧贴窗口右边缘；左侧贴窄栏右边
+  function rightFor(side, width) {
+    return side === "left" ? window.innerWidth - RAIL - EDGE - width : EDGE;
+  }
+  function setPos(right, width) {
+    drawer.style.setProperty("--lv-dr-right", right + "px");
+    drawer.style.setProperty("--lv-dr-width", width + "px");
+  }
+  function applyGeom() {
+    if (!drawer) return;
+    drawer.classList.toggle("is-left", !!geom && geom.side === "left");
+    if (!geom) {
+      drawer.style.removeProperty("--lv-dr-right");
+      drawer.style.removeProperty("--lv-dr-width");
+      return;
+    }
+    var width = clampWidth(geom.width);
+    setPos(rightFor(geom.side, width), width);
+  }
+  function bindDrag() {
+    var head = drawer.querySelector(".lv-drawer-head");
+    var edge = drawer.querySelector(".lv-drawer-resize");
+    function start(e, kind) {
+      if (mode !== "open" || e.button !== 0) return;
+      if (kind === "move" && e.target.closest("button")) return;
+      e.preventDefault();
+      var r = drawer.getBoundingClientRect();
+      var fromRight = window.innerWidth - r.right;
+      var fromWidth = r.width;
+      var side = geom ? geom.side : "right";
+      var x0 = e.clientX;
+      var target = e.currentTarget;
+      // 指针捕获：拖过会话 iframe 时事件也不会被它吞掉
+      target.setPointerCapture(e.pointerId);
+      drawer.classList.add("is-dragging");
+      var last = { right: fromRight, width: fromWidth };
+      function move(ev) {
+        var dx = ev.clientX - x0;
+        if (kind === "move") {
+          var right = Math.max(EDGE, Math.min(fromRight - dx, window.innerWidth - RAIL - EDGE - fromWidth));
+          last = { right: right, width: fromWidth };
+        } else {
+          // 内侧边缘：停在右侧时拖左边缘、停在左侧时拖右边缘
+          var width = clampWidth(side === "left" ? fromWidth + dx : fromWidth - dx);
+          last = { right: side === "left" ? fromRight - (width - fromWidth) : fromRight, width: width };
+        }
+        setPos(last.right, last.width);
+      }
+      function end() {
+        target.removeEventListener("pointermove", move);
+        target.removeEventListener("pointerup", end);
+        target.removeEventListener("pointercancel", end);
+        drawer.classList.remove("is-dragging");
+        // 松手吸附：面板中心在可用区域左半边就贴左，否则贴右（带过渡滑过去）
+        if (kind === "move") {
+          var center = window.innerWidth - last.right - last.width / 2;
+          side = center < (RAIL + window.innerWidth) / 2 ? "left" : "right";
+        }
+        geom = side === "right" && Math.abs(last.width - 460) < 2 ? null : { side: side, width: last.width };
+        applyGeom();
+        saveGeom();
+      }
+      target.addEventListener("pointermove", move);
+      target.addEventListener("pointerup", end);
+      target.addEventListener("pointercancel", end);
+    }
+    head.addEventListener("pointerdown", function (e) {
+      start(e, "move");
+    });
+    edge.addEventListener("pointerdown", function (e) {
+      start(e, "resize");
+    });
+    head.addEventListener("dblclick", function (e) {
+      if (mode !== "open" || e.target.closest("button")) return;
+      geom = null;
+      saveGeom();
+      applyGeom();
+    });
+    loadGeom();
+    applyGeom();
+    window.addEventListener("resize", applyGeom);
   }
   function ensureFrame() {
     if (frame) return;
@@ -180,7 +356,10 @@
     if (!on()) return;
     if (!drawer) build();
     ensureFrame();
-    if (mode === "closed") setMode("open");
+    if (mode === "closed") {
+      resetSide();
+      setMode("open");
+    }
   }
   function close() {
     setMode("closed");
@@ -202,6 +381,83 @@
     });
   }
   window.lvDrawerActive = on;
+  window.lvDrawerMode = function () {
+    return mode;
+  };
+  // 会话窗输入框的缩小箭头：全屏 → 缩回侧边；侧边 → 收起会话窗
+  window.lvDrawerArc = function () {
+    if (mode === "full") setMode("open");
+    else close();
+  };
+  /* ---------- 单行输入框上方的「装 Chrome 插件」引导卡（参考 dupe.com 结果页底部） ----------
+   * 卡片垫在单行胶囊后面、底边被胶囊压住；只在单行且没展开时出现（显隐见 overrides.css）。
+   * Not now / × 关掉后记在 localStorage，不再出现 */
+  var PROMO_KEY = "local:ext-promo-off";
+  function promoOff() {
+    try {
+      return localStorage.getItem(PROMO_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+  function mountPromo(layer) {
+    var panel = layer.querySelector('[class*="_dockPanel_"]');
+    if (!panel || promoOff() || panel.querySelector(":scope > .lv-ext-promo")) return;
+    var card = el("div", "lv-ext-promo");
+    card.innerHTML =
+      '<span class="lv-ext-promo-logo"><img src="' + base() + '/local/okiee-logo.png" alt=""></span>' +
+      '<div class="lv-ext-promo-main">' +
+      "<b>Find deals anywhere you browse</b>" +
+      "<p>Add the Okiee extension to compare prices on any product page, automatically.</p>" +
+      '<div class="lv-ext-promo-actions">' +
+      '<a class="lv-ext-promo-add" target="_blank" rel="noopener">Add to Chrome</a>' +
+      '<button type="button" class="lv-ext-promo-later">Not now</button>' +
+      "</div></div>" +
+      '<button type="button" class="lv-ext-promo-close" aria-label="Close">' +
+      svg(ICON.close) +
+      "</button>";
+    card.querySelector(".lv-ext-promo-add").href = window.lvExtUrl || "https://chromewebstore.google.com/";
+    function dismiss() {
+      try {
+        localStorage.setItem(PROMO_KEY, "1");
+      } catch (e) {}
+      card.classList.add("is-off");
+      setTimeout(function () {
+        card.remove();
+      }, 250);
+    }
+    card.querySelector(".lv-ext-promo-later").onclick = dismiss;
+    card.querySelector(".lv-ext-promo-close").onclick = dismiss;
+    // 卡片在输入坞里：点它的按钮不能拿焦点，否则会被当成「点进了输入框」展开成双行再缩回，一闪
+    card.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+    });
+    panel.insertBefore(card, panel.firstChild);
+  }
+  // Explore 底部输入框的小弧线：拉开右侧会话窗，已输入的文字和挂着的引用一起带过去
+  function dockToSide() {
+    var layer = dockLayer();
+    if (!layer) return;
+    var editor = layer.querySelector(".ProseMirror");
+    var text = editor ? editor.innerText.trim() : "";
+    var quote = dockQuote(layer);
+    if (text) {
+      editor.focus();
+      document.execCommand("selectAll", false);
+      document.execCommand("delete", false);
+      editor.blur();
+    }
+    if (quote && window.__lvClearQuotes) window.__lvClearQuotes();
+    open();
+    frameReady().then(function (w) {
+      if (quote) w.lvEmbedAttach(quote);
+      if (text)
+        setTimeout(function () {
+          w.lvEmbedFill(text);
+        }, quote ? 200 : 0);
+    });
+  }
+
   // 发一条消息到会话窗：quote 是输入框附件（{ quoteSource, display:{title,imageUrl}, pdp:{locator}, status }）
   window.lvDrawerSend = function (text, quote) {
     open();
@@ -258,6 +514,9 @@
     var dockOpen = layer && !layer.hasAttribute("data-lv-compact");
     tab.classList.toggle("is-hidden", mode !== "closed" || !!dockOpen);
     if (layer) aimDock(layer);
+    // 单行（胶囊形）时小弧线由 CSS 藏起，展开成双行后才出现
+    if (dockOpen) mountArc(layer.querySelector(".composer-shell__body"), null, dockToSide);
+    if (dockOpen) mountPromo(layer);
   }
   // 输入坞上挂着的引用商品（信息流卡片「Ask」带进来的，显示为附件卡片）→ 会话窗附件；按标题在商品池里找回商品信息
   function dockQuote(layer) {
@@ -287,8 +546,10 @@
       if (!on()) return;
       var btn = e.target.closest && e.target.closest('[class*="_askButton_"]');
       var layer = dockLayer();
-      // 输入框收成胶囊、或右侧会话窗开着时，引用都直接进会话窗（页面不回滚到顶部）
-      if (!btn || !layer || !(layer.hasAttribute("data-lv-compact") || mode !== "closed")) return;
+      // 输入框收成胶囊、或右侧会话窗开着时，引用都直接进会话窗（页面不回滚到顶部）；
+      // 「单行」输入框常驻底部：引用直接挂到这条输入框上，页面同样不动
+      var line = root.hasAttribute("data-lv-dock-line") && mode === "closed";
+      if (!btn || !layer || !(line || layer.hasAttribute("data-lv-compact") || mode !== "closed")) return;
       var card = btn.closest('[class*="_productCard_"]');
       var titleEl = card && card.querySelector('[class*="_productTitle_"]');
       var title = titleEl ? (titleEl.getAttribute("title") || titleEl.textContent).trim() : "";
@@ -301,12 +562,19 @@
         window.lvShop.products().filter(function (x) {
           return x.info.title === title || x.info.title.indexOf(title.replace(/…$/, "")) === 0;
         })[0];
-      window.lvDrawerAttach({
+      var quote = {
         quoteSource: "daily_picks_feed",
         display: { title: p ? p.info.title : title, imageUrl: p ? p.info.image : img ? img.src : "" },
         pdp: { locator: { source: p ? p.store : "", region: "US", offerId: p ? String(p.info.offer_id) : "" } },
         status: "active",
-      });
+      };
+      if (line && window.__lvAddQuote) {
+        window.__lvAddQuote(quote);
+        var editor = layer.querySelector(".ProseMirror");
+        if (editor) editor.focus({ preventScroll: true });
+        return;
+      }
+      window.lvDrawerAttach(quote);
     },
     true,
   );
@@ -405,7 +673,7 @@
     setTimeout(onRoute);
   });
 
-  // 窄栏的 Chat：方案四里就是拉开 / 收起会话窗
+  // 窄栏的 Chat：方案四里直接打开全屏会话（全屏时再点收起）
   document.addEventListener(
     "click",
     function (e) {
@@ -414,8 +682,10 @@
       if (!chat) return;
       e.preventDefault();
       e.stopPropagation();
-      if (mode === "closed") open();
-      else close();
+      // 窄栏的 Chat 直接进全屏会话；已经全屏时再点就收起
+      if (mode === "full") return close();
+      open();
+      setMode("full");
     },
     true,
   );

@@ -214,6 +214,11 @@
   height: 21px;
   overflow: hidden;
   pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+/* 光标进输入框：轮播的推广文案渐隐，让用户专注输入；失焦且没输入时再渐显回来 */
+.composer-shell__editor-host[data-lv-focus] .lv-ph {
+  opacity: 0;
 }
 .lv-ph-track {
   transform: translateY(0);
@@ -2441,7 +2446,7 @@
     border-color 0.2s ease;
 }
 .lv-keep-try:nth-child(1) {
-  --tone: #b7791f;
+  --tone: #f0960e;
   --tone-bg: #fff4dc;
   --tone-line: #f3dca6;
 }
@@ -4564,4 +4569,477 @@ body:has(aside[class*='_drawer_'][class*='_open_']) .lv-drawer-tab {
 }
 [class*='_askMigooIcon_'] > * {
   display: none;
+}
+
+/* ---------- 方案四：输入框右上角的小弧线（会话窗、Explore 底部输入框）——hover 变扩展按钮 + Visit agent，全屏时是缩小按钮 ---------- */
+.composer-shell__body:has(> .lv-agent-arc) {
+  position: relative;
+}
+.composer-shell__body:has(> .lv-agent-arc) .composer-shell__editor {
+  padding-right: 24px;
+}
+.lv-agent-arc {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #c4c8ce;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.lv-agent-arc svg {
+  grid-area: 1 / 1;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    opacity 0.15s ease,
+    transform 0.18s ease;
+}
+.lv-agent-arc .lv-arc-icon {
+  opacity: 0;
+  transform: scale(0.6);
+}
+.lv-agent-arc:hover,
+.lv-agent-arc.is-full {
+  color: #4e5969;
+}
+.lv-agent-arc:hover {
+  background: #f2f3f5;
+}
+.lv-agent-arc:hover .lv-arc-line,
+.lv-agent-arc.is-full .lv-arc-line {
+  opacity: 0;
+  transform: scale(0.6);
+}
+.lv-agent-arc:hover .lv-arc-icon,
+.lv-agent-arc.is-full .lv-arc-icon {
+  opacity: 1;
+  transform: none;
+}
+/* 提示：按钮上方的深色小气泡 */
+.lv-agent-arc::after {
+  content: attr(data-tip);
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #1f2329;
+  color: #fff;
+  font: 500 12px/1.4 Inter, -apple-system, sans-serif;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+.lv-agent-arc:hover::after {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- 方案四「单行」：底部常驻一条单行胶囊输入框（参考 daydream.ing 的 Chat to refine） ----------
+ * 输入框原本是纵向三段（引用附件 / 编辑区 / 按钮行）：改成一行——左侧 + 和购物袋、中间编辑区、右侧麦克风和发送；
+ * 挂了引用商品时附件单独占上面一行，圆角相应收小；
+ * 点进去（聚焦）或有输入 / 引用时整套规则失效（:not([data-lv-line-active])），回到平时的双行输入框 */
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__body {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0;
+  row-gap: 0;
+  /* 四周都留 4px：发送按钮（32px 圆）和胶囊右端的半圆同心 */
+  padding: 4px;
+  border-radius: 999px;
+}
+/* 单行胶囊不用整条 800px：收窄到 560px，窄屏时两边各留 16px */
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) [class*='_dockPanel_'] {
+  width: min(560px, calc(100% - 32px)) !important;
+  max-width: none !important;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__body:has(.ant-file-card-list-item) {
+  border-radius: 24px;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__header {
+  order: -2;
+  flex: 0 0 100%;
+  padding: 0;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__body:has(.ant-file-card-list-item) .composer-shell__header {
+  padding: 2px 2px 8px;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer {
+  display: contents;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-left {
+  order: -1;
+}
+/* 紧凑：按钮 32px、组内间距 2px */
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-left,
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-right,
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-aux {
+  gap: 2px !important;
+}
+/* 左侧 + 和购物袋：按钮收窄到 28px、贴在一起，两个图标之间约 9px */
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-left {
+  gap: 0 !important;
+  padding-left: 4px;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-left .composer-shell__footer-btn {
+  width: 28px !important;
+  min-width: 28px !important;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-left > *,
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-right > * {
+  margin: 0 !important;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-btn,
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-mic-slot,
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-send-slot {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__editor {
+  order: 0;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 4px;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__footer-right {
+  order: 1;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .lv-agent-arc {
+  display: none;
+}
+/* 单行 ↔ 双行切换时宽度平滑过渡（560px ↔ 原本的 800px） */
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_'] [class*='_dockPanel_'] {
+  transition: width 0.25s ease;
+}
+
+
+/* ---------- 方案四「单行」：输入框上方的「装 Chrome 插件」引导卡（参考 dupe.com）——垫在胶囊后面、底边被胶囊压住 ---------- */
+.lv-ext-promo {
+  display: none;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .lv-ext-promo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% - 22px);
+  z-index: 0;
+  display: flex;
+  gap: 12px;
+  padding: 14px 14px 34px;
+  border: 1px solid rgba(245, 166, 35, 0.22);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fff9ea 0%, #fff4dc 100%);
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
+  font-family: Inter, -apple-system, sans-serif;
+  animation: lv-ext-promo-in 0.3s ease both;
+  transition:
+    opacity 0.2s ease,
+    transform 0.25s ease;
+}
+[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__body {
+  position: relative;
+  z-index: 1;
+}
+.lv-ext-promo.is-off {
+  opacity: 0;
+  transform: translateY(24px);
+}
+@keyframes lv-ext-promo-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+.lv-ext-promo-logo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(245, 166, 35, 0.25);
+}
+.lv-ext-promo-logo img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+.lv-ext-promo-main {
+  flex: 1;
+  min-width: 0;
+  padding-right: 20px;
+}
+.lv-ext-promo-main b {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #1f2329;
+}
+.lv-ext-promo-main p {
+  margin: 2px 0 10px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #4e5969;
+}
+.lv-ext-promo-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lv-ext-promo-add {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #1f2329;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+.lv-ext-promo-add:hover {
+  background: #000;
+  color: #fff;
+}
+.lv-ext-promo-later {
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #4e5969;
+  font-size: 13px;
+  cursor: pointer;
+}
+.lv-ext-promo-later:hover {
+  background: rgba(31, 35, 41, 0.06);
+}
+.lv-ext-promo-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #86909c;
+  cursor: pointer;
+}
+.lv-ext-promo-close:hover {
+  background: rgba(31, 35, 41, 0.06);
+  color: #1f2329;
+}
+.lv-ext-promo-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---------- TRY THIS 卡重做：更醒目的行动卡——左侧图标块、标题 + 一句价值说明、右侧强调色箭头按钮 ----------
+ * 每张卡沿用 --tone 系列配色（见上方 .lv-keep-try:nth-child）；底色从强调色淡出到白，角落一团同色光晕；
+ * hover：卡片上浮 + 同色投影，图标块轻转，箭头按钮右移 */
+.lv-keep-try {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 88px;
+  padding: 0 16px 0 14px;
+  overflow: hidden;
+  border: 1px solid var(--tone-line);
+  border-radius: 20px;
+  background:
+    radial-gradient(120px 90px at 100% 0%, color-mix(in srgb, var(--tone) 16%, transparent), transparent 70%),
+    linear-gradient(135deg, var(--tone-bg) 0%, #fff 75%);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 18px color-mix(in srgb, var(--tone) 10%, transparent);
+  text-align: left;
+}
+.lv-keep-try:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--tone) 55%, #fff);
+  background:
+    radial-gradient(140px 100px at 100% 0%, color-mix(in srgb, var(--tone) 22%, transparent), transparent 70%),
+    linear-gradient(135deg, var(--tone-bg) 0%, #fff 75%);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 16px 32px color-mix(in srgb, var(--tone) 22%, transparent);
+}
+.lv-keep-try:active {
+  transform: translateY(-1px);
+}
+/* 图标块：白底圆角方块 + 同色描边光 */
+.lv-keep-try .lv-keep-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #fff 0%, var(--tone-bg) 100%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--tone) 18%, transparent),
+    0 6px 14px color-mix(in srgb, var(--tone) 18%, transparent);
+}
+.lv-keep-try .lv-keep-icon-wrap .lv-keep-chip-icon {
+  width: 30px;
+  height: 30px;
+}
+.lv-keep-try:hover .lv-keep-icon-wrap {
+  transform: scale(1.06) rotate(-6deg);
+}
+.lv-keep-try .lv-keep-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.lv-keep-try .lv-keep-text b {
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 20px;
+  letter-spacing: -0.1px;
+  color: #1f2329;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.lv-keep-sub {
+  overflow: hidden;
+  font-size: 12.5px;
+  line-height: 17px;
+  color: #6b7079;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+/* 右侧箭头按钮：实心强调色圆 */
+.lv-keep-arrow {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--tone);
+  color: #fff;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--tone) 35%, transparent);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.lv-keep-arrow svg {
+  width: 16px;
+  height: 16px;
+}
+.lv-keep-try:hover .lv-keep-arrow {
+  transform: translateX(3px);
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--tone) 45%, transparent);
+}
+.lv-keep-try .lv-keep-go,
+.lv-keep-try .lv-keep-eyebrow {
+  display: none;
+}
+
+/* ---------- 方案四侧边会话窗可拖动：位置 / 宽度由 drawer.js 写进 --lv-dr-right / --lv-dr-width（全屏时不生效） ---------- */
+.lv-drawer {
+  right: var(--lv-dr-right, 12px);
+  width: var(--lv-dr-width, min(460px, calc(100vw - 96px)));
+  /* 收起时滑出屏幕：挪到左边过也要整个滑出去 */
+  transform: translateX(calc(100% + 12px + var(--lv-dr-right, 12px)));
+}
+.lv-drawer.is-full {
+  right: 0;
+  width: calc(100vw - 64px);
+}
+.lv-drawer.is-open:not(.is-full) .lv-drawer-head {
+  cursor: grab;
+  user-select: none;
+}
+.lv-drawer.is-dragging,
+.lv-drawer.is-dragging .lv-drawer-head {
+  cursor: grabbing;
+  transition: none !important;
+}
+.lv-drawer.is-dragging iframe {
+  pointer-events: none;
+}
+/* 左边缘的改宽把手：一条 8px 的感应区，hover 时露出一道竖线 */
+.lv-drawer-resize {
+  position: absolute;
+  top: 52px;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  width: 8px;
+  cursor: ew-resize;
+}
+.lv-drawer.is-full .lv-drawer-resize,
+.lv-drawer:not(.is-open) .lv-drawer-resize {
+  display: none;
+}
+.lv-drawer-resize::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 3px;
+  height: 40px;
+  border-radius: 3px;
+  background: #c9cdd4;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.15s ease;
+}
+.lv-drawer-resize:hover::after,
+.lv-drawer.is-dragging .lv-drawer-resize::after {
+  opacity: 1;
+}
+/* 停靠在左侧（贴着窄栏）：改宽把手换到右边缘，收起时往左滑出 */
+.lv-drawer.is-left {
+  transform: translateX(calc(-100% - 12px - 64px));
+}
+.lv-drawer.is-left.is-open {
+  transform: none;
+}
+.lv-drawer.is-left .lv-drawer-resize {
+  left: auto;
+  right: 0;
+}
+.lv-drawer.is-left .lv-drawer-resize::after {
+  left: auto;
+  right: 3px;
+}
+/* 吸附滑过去时 right 有过渡（.lv-drawer 自带）；拖动中关掉过渡 */
+
+/* 原页面的 PDP 抽屉关着时停在屏幕右外侧，但阴影（-18px 0 48px）会漏进来，在页面和会话窗右边缘留一道灰影：关着时去掉阴影 */
+aside[class*='_drawer_'][class*='_workspacePanel_']:not([class*='_open_']),
+[data-lv-embed] aside[class*='_drawer_']:not([class*='_open_']) {
+  box-shadow: none !important;
 }

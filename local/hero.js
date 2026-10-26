@@ -67,17 +67,30 @@
     );
   }
 
+  // 每张卡标题下的一句价值说明
+  var TRY_SUB = {
+    compare: "Lowest total across every store",
+    track: "Get alerted the moment it drops",
+    budget: "Best picks that fit your budget",
+    ideas: "Gift and shopping inspiration",
+  };
   function render() {
     keep.innerHTML = "";
     keep.appendChild(el("div", "lv-keep-title", "Start here"));
     var row = el("div", "lv-keep-row");
     originalChips().forEach(function (chip) {
+      var kind = /compare/i.test(chip.label)
+        ? "compare"
+        : /track/i.test(chip.label)
+          ? "track"
+          : /budget/i.test(chip.label)
+            ? "budget"
+            : /idea/i.test(chip.label)
+              ? "ideas"
+              : null;
+      // 卡片版式：左侧图标块 + 标题 / 一句价值说明 + 右侧强调色箭头按钮
       var card = el("button", "lv-keep-card lv-keep-try");
       card.type = "button";
-      var text = el("span", "lv-keep-text");
-      text.appendChild(el("small", "lv-keep-eyebrow", "Try this"));
-      text.appendChild(el("b", null, chip.label));
-      card.appendChild(text);
       if (chip.icon) {
         var ic = el("span", "lv-keep-icon-wrap");
         var img = el("img", "lv-keep-chip-icon");
@@ -86,18 +99,16 @@
         ic.appendChild(img);
         card.appendChild(ic);
       }
-      card.appendChild(el("span", "lv-keep-go", "Try it →"));
+      var text = el("span", "lv-keep-text");
+      text.appendChild(el("b", null, chip.label));
+      if (TRY_SUB[kind]) text.appendChild(el("small", "lv-keep-sub", TRY_SUB[kind]));
+      card.appendChild(text);
+      var go = el("span", "lv-keep-arrow");
+      go.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+      card.appendChild(go);
       card.onclick = function () {
         // 四张卡各自弹 try-this.js 的创作弹窗（参考 new-task）；认不出的仍触发原 chip
-        var kind = /compare/i.test(chip.label)
-          ? "compare"
-          : /track/i.test(chip.label)
-            ? "track"
-            : /budget/i.test(chip.label)
-              ? "budget"
-              : /idea/i.test(chip.label)
-                ? "ideas"
-                : null;
         if (kind && window.lvOpenTry) window.lvOpenTry(kind);
         else chip.tile.click();
       };
