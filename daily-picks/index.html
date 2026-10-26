@@ -9,11 +9,14 @@
     <script>window.LV_BASE='/migoo-daily-picks';window.LV_DATA_PARTS=8;window.LV_DEFAULT_VARIANT="v5";</script>
     <!-- 本地镜像：接口回放层，必须先于应用脚本执行 -->
     <script src="/migoo-daily-picks/mock/mock-api.js"></script>
-    <!-- 本地改版：根路径默认进入 Daily Picks -->
+    <!-- 本地改版：打开页面一律先进电商页 Daily Picks（根路径、会话页 /home、/chat 的链接或刷新都落到 Explore） -->
     <script>
-      if (window.lvPath() === '/' || window.lvPath() === '') history.replaceState(history.state, '', (window.LV_BASE || '') + '/daily-picks' + location.search + location.hash)
-      // 静态托管刷新子页面时会补成目录形式（/home/），应用路由不认结尾斜杠会不停重载，这里去掉
-      else if (/.\/$/.test(window.lvPath())) history.replaceState(history.state, '', location.pathname.replace(/\/+$/, '') + location.search + location.hash)
+      (function () {
+        var p = window.lvPath().replace(/\/+$/, '') || '/'
+        if (p === '/' || /^\/(home|chat)(\/|$)/.test(p)) history.replaceState(history.state, '', (window.LV_BASE || '') + '/daily-picks')
+        // 静态托管刷新子页面时会补成目录形式（/liked/），应用路由不认结尾斜杠会不停重载，这里去掉
+        else if (/.\/$/.test(window.lvPath())) history.replaceState(history.state, '', location.pathname.replace(/\/+$/, '') + location.search + location.hash)
+      })()
     </script>
     <!-- SRI integrity hashes recalculated after build -->
     <meta name="migoo-web-version" content="1f6cd92_20261024111137">

@@ -7,10 +7,11 @@
   var VARIANTS = [
     { id: "v1", name: "方案一", desc: "线上原版（带侧边栏）" },
     { id: "v2", name: "方案二", desc: "Daydream 式顶栏：Explore + 个人中心" },
-    { id: "v3", name: "方案三", desc: "Phia 式左侧窄栏：Chat / Explore / Favorites" },
-    { id: "v4", name: "方案四", desc: "方案三 + 信息流上方 Categories 商品分类" },
-    { id: "v5", name: "方案五", desc: "方案四 + 底部输入框（滚动收起）、去掉合集区、小优惠券" },
+    { id: "v3", name: "方案三", desc: "Phia 式左侧窄栏：Chat / Explore / Favorites", hidden: true },
+    { id: "v4", name: "方案四", desc: "方案三 + 信息流上方 Categories 商品分类", hidden: true },
+    { id: "v5", name: "方案五", desc: "左侧窄栏 + Explore 首屏、底部输入框（滚动收起）、小优惠券" },
   ];
+  // hidden：不出现在切换菜单里，存过的也回落到默认方案（代码保留，方案五仍复用方案三、四的改动）
   var KEY = "local:variant";
   var root = document.documentElement;
 
@@ -20,7 +21,7 @@
       v = localStorage.getItem(KEY);
     } catch (e) {}
     return VARIANTS.some(function (x) {
-      return x.id === v;
+      return x.id === v && !x.hidden;
     })
       ? v
       : window.LV_DEFAULT_VARIANT || VARIANTS[0].id;
@@ -108,6 +109,7 @@
     var v = current();
     menu.innerHTML = '<div class="lv-menu-title">页面方案</div>';
     VARIANTS.forEach(function (x) {
+      if (x.hidden) return;
       var item = el(
         "button",
         "lv-menu-item" + (x.id === v ? " is-active" : ""),
@@ -811,20 +813,17 @@
   }
 
   /* ---------- 方案二：个人中心浮层（hover 头像胶囊出现，参考 Google 账号面板） ----------
-   * 数据取自录制的 user/info/me、billing 接口（mock-api 暴露的 mockLookup）。
+   * 数据取自录制的 user/info/me（mock-api 暴露的 mockLookup）。不展示 Plan / Points / Upgrade、AI Model、Invite Code。
    * 各菜单项不自己实现二级页：Memory 等打开原页面的个人中心卡片（#me）并点中对应项，
-   * Invite Code / Feedback & Support 只在原侧边栏头像菜单里，就去点那里的原入口。 */
+   * Feedback & Support 只在原侧边栏头像菜单里，就去点那里的原入口。 */
   var ICONS = {
     memory: '<path d="M9.5 4.5a4.5 4.5 0 0 0-4.4 5.4A4 4 0 0 0 6.5 17H8v2.5h6V17a5 5 0 0 0 4.5-5v-.5A7 7 0 0 0 9.5 4.5Z"/><path d="m12 8.5.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7Z"/>',
     browser: '<rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M3.5 9.5h17"/>',
     lock: '<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>',
     globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.5 5.4 3.5 8.5s-1 5.9-3.5 8.5c-2.5-2.6-3.5-5.4-3.5-8.5s1-5.9 3.5-8.5Z"/>',
-    sliders: '<path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/>',
-    gift: '<rect x="4" y="9" width="16" height="11" rx="2"/><path d="M12 9v11M4 13h16M12 9c-1.5-3.5-5.5-3.5-5 0M12 9c1.5-3.5 5.5-3.5 5 0"/>',
     chat: '<path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-7l-4 3v-3H5A1.5 1.5 0 0 1 3.5 16V7A1.5 1.5 0 0 1 5 5.5Z"/>',
     people: '<circle cx="9" cy="9" r="3"/><path d="M3.5 19c.6-3 2.8-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M15.5 14.6c2.4-.3 4.4.9 5 3.9"/>',
     logout: '<path d="M14 5.5V5a1.5 1.5 0 0 0-1.5-1.5h-6A1.5 1.5 0 0 0 5 5v14a1.5 1.5 0 0 0 1.5 1.5h6A1.5 1.5 0 0 0 14 19v-.5M10 12h10.5M17.5 9l3 3-3 3"/>',
-    star: '<path d="m12 3.5 2.4 5 5.4.6-4 3.7 1.1 5.4L12 15.5l-4.9 2.7 1.1-5.4-4-3.7 5.4-.6Z"/>',
   };
   var ACCT_GROUPS = [
     [
@@ -834,10 +833,8 @@
     [
       { icon: "lock", label: "Web Permissions", me: true },
       { icon: "globe", label: "Language", me: true },
-      { icon: "sliders", label: "AI Model", me: true },
     ],
     [
-      { icon: "gift", label: "Invite Code", sider: true },
       { icon: "chat", label: "Feedback & Support", sider: true },
       { icon: "people", label: "Join Community", me: true },
     ],
@@ -859,8 +856,6 @@
     };
     acct.onmouseleave = scheduleHideAcct;
     var me = (window.mockLookup && window.mockLookup("GET /beeai/api/v1/user/info/me")) || {};
-    var credits = (window.mockLookup && window.mockLookup("GET /beeai/api/v1/billing/credits/summary")) || {};
-    var boot = (window.mockLookup && window.mockLookup("GET /beeai/api/v1/billing/bootstrap")) || {};
     var name = me.display_name || profileName.textContent;
     var avatar = me.avatar_url || profileAvatar.src;
 
@@ -877,21 +872,7 @@
     };
     acct.appendChild(head);
 
-    var plan = el("div", "lv-acct-plan");
-    var tier = (me.subscription_status && me.subscription_status.tier) || "Free";
-    plan.innerHTML =
-      '<div class="lv-acct-plan-cell"><span class="lv-acct-plan-label">Plan</span><b></b></div>' +
-      '<div class="lv-acct-plan-cell"><span class="lv-acct-plan-label">Points</span><b></b></div>' +
-      '<button type="button" class="lv-acct-upgrade"></button>';
-    plan.querySelectorAll("b")[0].textContent = typeof tier === "string" ? tier : "Free";
-    plan.querySelectorAll("b")[1].textContent = (credits.total_points || 0).toLocaleString("en-US");
-    var up = plan.querySelector(".lv-acct-upgrade");
-    up.innerHTML = svg("star") + "<span></span>";
-    up.querySelector("span").textContent = (boot.entry && boot.entry.text) || "Upgrade";
-    up.onclick = function () {
-      openInMe("Upgrade");
-    };
-    acct.appendChild(plan);
+    // Plan / Points / Upgrade 分区按需求去掉
 
     ACCT_GROUPS.forEach(function (group) {
       var g = el("div", "lv-acct-group");

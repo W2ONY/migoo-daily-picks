@@ -933,10 +933,6 @@
     close: '<path d="M6 6l12 12M18 6 6 18"/>',
     store:
       '<path d="M4 9.5 5.5 4.5h13L20 9.5"/><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 12v7.5h13V12"/>',
-    receipt:
-      '<path d="M6 3.5h12v17l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3-2 1.3z"/><path d="M9 8.5h6M9 12h6M9 15.5h3"/>',
-    ticket:
-      '<path d="M4 8.5V6a1.5 1.5 0 0 1 1.5-1.5h13A1.5 1.5 0 0 1 20 6v2.5a2.5 2.5 0 0 0 0 5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18v-4.5a2.5 2.5 0 0 0 0-5Z"/><path d="M10 9.5h4M10 14.5h4"/>',
     bell: '<path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 1.5h-14z"/><path d="M10 20.5h4"/>',
     clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
     sort: '<path d="M7 5v14M4 16l3 3 3-3"/><path d="M13 7h7M13 12h5M13 17h3"/>',
@@ -1183,55 +1179,6 @@
       });
     });
   }
-  function storesChip() {
-    var sh = S();
-    return optChip(
-      ICON.store,
-      function () {
-        var n = state.opts.stores.length;
-        return !n
-          ? "All stores"
-          : n === 1
-            ? sh.storeName(state.opts.stores[0])
-            : n + " stores";
-      },
-      function (menu, refresh) {
-        var all = menuItem(
-          menu,
-          "All stores",
-          !state.opts.stores.length,
-          function () {
-            state.opts.stores = [];
-            refresh();
-            closeMenus();
-          },
-        );
-        all.classList.add("lv-cmp-menu-all");
-        stores().forEach(function (s) {
-          var it = menuItem(
-            menu,
-            sh.storeName(s),
-            state.opts.stores.indexOf(s) >= 0,
-            function () {
-              var i = state.opts.stores.indexOf(s);
-              if (i >= 0) state.opts.stores.splice(i, 1);
-              else state.opts.stores.push(s);
-              it.classList.toggle("is-on", i < 0);
-              all.classList.toggle("is-on", !state.opts.stores.length);
-              refresh();
-            },
-          );
-          var logo = sh.storeLogo(s);
-          if (logo)
-            it.insertAdjacentHTML(
-              "beforeend",
-              '<img class="lv-cmp-menu-logo" alt="" src="' + logo + '">',
-            );
-        });
-      },
-    );
-  }
-
   /* ---------- 公共：商品投放区（Compare / Track） ---------- */
   function productSection(body) {
     body.appendChild(el("div", "lv-cmp-label", "Which product?"));
@@ -1403,11 +1350,13 @@
       state.note = note.value;
     };
     box.appendChild(note);
-    var opts = el("div", "lv-cmp-opts");
-    chips.forEach(function (c) {
-      opts.appendChild(c);
-    });
-    box.appendChild(opts);
+    if (chips.length) {
+      var opts = el("div", "lv-cmp-opts");
+      chips.forEach(function (c) {
+        opts.appendChild(c);
+      });
+      box.appendChild(opts);
+    }
     body.appendChild(box);
   }
   function pills(list, isOn, onPick) {
@@ -1443,21 +1392,8 @@
     },
     body: function (body) {
       productSection(body);
-      extraSection(
-        body,
-        "Anything to consider? e.g. Prime shipping only (optional)",
-        [
-          storesChip(),
-          radioChip(ICON.receipt, "mode", [
-            ["total", "Total incl. shipping"],
-            ["item", "Item price only"],
-          ]),
-          radioChip(ICON.ticket, "coupons", [
-            [true, "With coupons"],
-            [false, "No coupons"],
-          ]),
-        ],
-      );
+      // 不给门店 / 运费 / 券的选项 chips，一律按全部门店、含运费、含券比价
+      extraSection(body, "Anything to consider? e.g. Prime shipping only (optional)", []);
     },
     ready: function () {
       return !!state.product;
