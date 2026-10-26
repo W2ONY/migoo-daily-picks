@@ -4522,11 +4522,12 @@
 [data-local-variant='v5'] .lv-title {
   margin-bottom: 0;
 }
+/* 标题 → TRY THIS 卡留 ~52px；卡 → Price Drops 收到 ~28px（Price Drops 前面的合集标题 / 合集卡在方案三已隐藏） */
 [data-local-variant='v5'] .lv-keep {
-  margin-top: -4px;
+  margin-top: 34px;
 }
-[data-local-variant='v5'] .lv-cats > .lv-tracker:first-of-type {
-  margin-top: -8px;
+[data-local-variant='v5'] .lv-cats > .lv-cats-rowwrap + .lv-tracker {
+  margin-top: 6px;
 }
 
 /* 方案四：右侧会话窗开着时，页面底部的输入框整个让位（滚回顶部也不展开），输入相关交互都由会话窗承接 */
