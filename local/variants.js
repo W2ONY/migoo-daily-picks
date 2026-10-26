@@ -55,16 +55,16 @@
     if (isHero()) document.body.setAttribute("data-daily-picks-input-entry", "");
     else document.body.removeAttribute("data-daily-picks-input-entry");
   }
-  // 方案四样式分支（localStorage local:v4-layout）：scroll = 横滑（默认），grid = 多行 + See more
+  // 方案三（原方案四/五）样式分支（localStorage local:v4-layout）：grid = 折叠（多行 + See more，默认），scroll = 横滑
   var V4_LAYOUTS = [
     { id: "scroll", name: "横滑" },
     { id: "grid", name: "折叠" },
   ];
   function v4Layout() {
     try {
-      return localStorage.getItem("local:v4-layout") === "grid" ? "grid" : "scroll";
+      return localStorage.getItem("local:v4-layout") === "scroll" ? "scroll" : "grid";
     } catch (e) {
-      return "scroll";
+      return "grid";
     }
   }
   function setV4Layout(id) {

@@ -1,6 +1,6 @@
 /*
  * Start here 的四张「TRY THIS」卡：点击弹出各自的创作弹窗（版式参考 /new-task 的「Make a product video」）——
- * 左侧示意图 + 一句话说明，右侧是这一项的主输入 + 一行可选补充 + 选项 chips，底部主按钮。
+ * 左侧示意图 + 一句话说明，右侧是这一项的主输入 + 一行可选补充输入框，底部主按钮。
  *   compare  Compare Prices          选商品（贴链接 / 照片 / 看过的）→ 多门店报价表 + 门店报价卡
  *   track    Track Price Drops       选商品 + 目标价 → 降价提醒卡 + 商品卡
  *   budget   Shop Within Budget       想买什么 + 预算 → 预算内的商品卡
@@ -931,16 +931,8 @@
     upload:
       '<path d="M12 15V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4.5 15v3.5A1.5 1.5 0 0 0 6 20h12a1.5 1.5 0 0 0 1.5-1.5V15"/>',
     close: '<path d="M6 6l12 12M18 6 6 18"/>',
-    store:
-      '<path d="M4 9.5 5.5 4.5h13L20 9.5"/><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5.5 12v7.5h13V12"/>',
     bell: '<path d="M6.5 16.5V11a5.5 5.5 0 0 1 11 0v5.5l1.5 1.5h-14z"/><path d="M10 20.5h4"/>',
-    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
-    sort: '<path d="M7 5v14M4 16l3 3 3-3"/><path d="M13 7h7M13 12h5M13 17h3"/>',
-    wallet:
-      '<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v4"/><path d="M4 7.5V17a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1V10a1 1 0 0 0-1-1H6.5A2.5 2.5 0 0 1 4 6.5"/><circle cx="16" cy="14" r="1"/>',
     search: '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>',
-    chevron: '<path d="m7 10 5 5 5-5"/>',
-    check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
     spark:
       '<path d="M12 3.5 13.8 9a2 2 0 0 0 1.2 1.2l5.5 1.8-5.5 1.8a2 2 0 0 0-1.2 1.2L12 20.5 10.2 15A2 2 0 0 0 9 13.8L3.5 12 9 10.2A2 2 0 0 0 10.2 9z"/>',
   };
@@ -1114,71 +1106,6 @@
     },
   };
 
-  /* ---------- 选项 chips + 下拉 ---------- */
-  function closeMenus() {
-    if (!modal) return;
-    [].forEach.call(modal.querySelectorAll(".lv-cmp-menu"), function (m) {
-      m.remove();
-    });
-    [].forEach.call(
-      modal.querySelectorAll(".lv-cmp-opt.is-open"),
-      function (b) {
-        b.classList.remove("is-open");
-      },
-    );
-  }
-  function optChip(icon, label, build) {
-    var b = el("button", "lv-cmp-opt");
-    b.type = "button";
-    b.innerHTML = svg(icon) + "<span></span>" + svg(ICON.chevron);
-    b._label = b.querySelector("span");
-    b._label.textContent = label();
-    b.onclick = function (e) {
-      e.stopPropagation();
-      var open = b.classList.contains("is-open");
-      closeMenus();
-      if (open) return;
-      b.classList.add("is-open");
-      var menu = el("div", "lv-cmp-menu");
-      build(menu, function () {
-        b._label.textContent = label();
-      });
-      menu.onclick = function (ev) {
-        ev.stopPropagation();
-      };
-      b.parentNode.appendChild(menu);
-      menu.style.left = b.offsetLeft + "px";
-    };
-    return b;
-  }
-  function menuItem(menu, text, checked, onPick) {
-    var it = el("button", "lv-cmp-menu-item" + (checked ? " is-on" : ""));
-    it.type = "button";
-    it.innerHTML =
-      '<span class="lv-cmp-menu-check">' + svg(ICON.check) + "</span>";
-    it.appendChild(el("span", null, text));
-    it.onclick = onPick;
-    menu.appendChild(it);
-    return it;
-  }
-  // 单选下拉：choices = [[值, 文案], …]
-  function radioChip(icon, key, choices) {
-    function label() {
-      return choices.filter(function (c) {
-        return c[0] === state.opts[key];
-      })[0][1];
-    }
-    return optChip(icon, label, function (menu, refresh) {
-      choices.forEach(function (c) {
-        menuItem(menu, c[1], state.opts[key] === c[0], function () {
-          state.opts[key] = c[0];
-          refresh();
-          closeMenus();
-          refreshGo();
-        });
-      });
-    });
-  }
   /* ---------- 公共：商品投放区（Compare / Track） ---------- */
   function productSection(body) {
     body.appendChild(el("div", "lv-cmp-label", "Which product?"));
@@ -1340,8 +1267,8 @@
     };
     r.readAsDataURL(f);
   }
-  // 一行可选补充 + 选项 chips
-  function extraSection(body, placeholder, chips) {
+  // 一行可选补充（各弹窗都不再给选项 chips，选项按默认值）
+  function extraSection(body, placeholder) {
     var box = el("div", "lv-cmp-extra");
     var note = el("input", "lv-cmp-note");
     note.type = "text";
@@ -1350,15 +1277,9 @@
       state.note = note.value;
     };
     box.appendChild(note);
-    if (chips.length) {
-      var opts = el("div", "lv-cmp-opts");
-      chips.forEach(function (c) {
-        opts.appendChild(c);
-      });
-      box.appendChild(opts);
-    }
     body.appendChild(box);
   }
+
   function pills(list, isOn, onPick) {
     var row = el("div", "lv-try-pills");
     list.forEach(function (it) {
@@ -1392,8 +1313,7 @@
     },
     body: function (body) {
       productSection(body);
-      // 不给门店 / 运费 / 券的选项 chips，一律按全部门店、含运费、含券比价
-      extraSection(body, "Anything to consider? e.g. Prime shipping only (optional)", []);
+      extraSection(body, "Anything to consider? e.g. Prime shipping only (optional)");
     },
     ready: function () {
       return !!state.product;
@@ -1477,24 +1397,7 @@
         markPreset();
       };
       markPreset();
-      extraSection(
-        body,
-        "Anything to consider? e.g. only the black one (optional)",
-        [
-          radioChip(ICON.store, "scope", [
-            ["any", "Any store"],
-            ["store", "This store only"],
-          ]),
-          radioChip(ICON.clock, "freq", [
-            ["daily", "Check daily"],
-            ["hourly", "Check hourly"],
-          ]),
-          radioChip(ICON.bell, "notify", [
-            ["app", "Notify in Migoo"],
-            ["email", "Migoo + email"],
-          ]),
-        ],
-      );
+      extraSection(body, "Anything to consider? e.g. only the black one (optional)");
     },
     ready: function () {
       return !!state.product && state.target > 0;
@@ -1607,16 +1510,7 @@
         setBudget(BUDGET_STEPS[Number(range.value)]);
       };
       setBudget(state.budget);
-      extraSection(
-        body,
-        "Anything to consider? e.g. must be waterproof (optional)",
-        [
-          radioChip(ICON.sort, "sort", [
-            ["value", "Best value first"],
-            ["low", "Cheapest first"],
-          ]),
-        ],
-      );
+      extraSection(body, "Anything to consider? e.g. must be waterproof (optional)");
     },
     ready: function () {
       return !!state.what.trim() && state.budget > 0;
@@ -1672,19 +1566,7 @@
       );
       main.appendChild(occ);
       body.appendChild(main);
-      extraSection(
-        body,
-        "Tell Migoo more, e.g. loves golf and coffee (optional)",
-        [
-          radioChip(ICON.wallet, "budget", [
-            [0, "Any budget"],
-            [25, "Under $25"],
-            [50, "Under $50"],
-            [100, "Under $100"],
-            [200, "Under $200"],
-          ]),
-        ],
-      );
+      extraSection(body, "Tell Migoo more, e.g. loves golf and coffee (optional)");
     },
     ready: function () {
       return !!state.who;
@@ -1717,15 +1599,13 @@
     modal.querySelector(".lv-cmp-close").onclick = close;
     modal.addEventListener("click", function (e) {
       if (e.target === modal) close();
-      else closeMenus();
     });
     modal.querySelector(".lv-cmp-go").onclick = submit;
     document.body.appendChild(modal);
   }
   function onKey(e) {
     if (e.key !== "Escape" || !modal) return;
-    if (modal.querySelector(".lv-cmp-menu")) closeMenus();
-    else close();
+    close();
   }
   window.lvOpenTry = function (k) {
     var kind = KINDS[k];
