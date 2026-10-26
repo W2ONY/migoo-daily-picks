@@ -7,9 +7,9 @@
   var VARIANTS = [
     { id: "v1", name: "方案一", desc: "线上原版（带侧边栏）" },
     { id: "v2", name: "方案二", desc: "Daydream 式顶栏：Explore + 个人中心" },
-    { id: "v3", name: "方案三", desc: "Phia 式左侧窄栏：Chat / Explore / Favorites", hidden: true },
+    { id: "v3", name: "方案三（旧）", desc: "Phia 式左侧窄栏：Chat / Explore / Favorites", hidden: true },
     { id: "v4", name: "方案四", desc: "方案三 + 信息流上方 Categories 商品分类", hidden: true },
-    { id: "v5", name: "方案五", desc: "左侧窄栏 + Explore 首屏、底部输入框（滚动收起）、小优惠券" },
+    { id: "v5", name: "方案三", desc: "左侧窄栏 + Explore 首屏、底部输入框（滚动收起）、小优惠券" },
   ];
   // hidden：不出现在切换菜单里，存过的也回落到默认方案（代码保留，方案五仍复用方案三、四的改动）
   var KEY = "local:variant";
@@ -58,7 +58,7 @@
   // 方案四样式分支（localStorage local:v4-layout）：scroll = 横滑（默认），grid = 多行 + See more
   var V4_LAYOUTS = [
     { id: "scroll", name: "横滑" },
-    { id: "grid", name: "多行 · See more" },
+    { id: "grid", name: "折叠" },
   ];
   function v4Layout() {
     try {
@@ -129,7 +129,7 @@
       // 方案四的样式分支：卡片横滑 / 多行 + See more 分页
       if ((x.id === "v4" || x.id === "v5") && v === x.id) {
         var seg = el("div", "lv-menu-seg");
-        seg.appendChild(el("span", "lv-menu-seg-label", "方案四样式"));
+        seg.appendChild(el("span", "lv-menu-seg-label", "方案三样式"));
         var group = el("div", "lv-menu-seg-group");
         V4_LAYOUTS.forEach(function (l) {
           var b = el("button", "lv-menu-seg-btn" + (v4Layout() === l.id ? " is-active" : ""), l.name);
