@@ -451,7 +451,7 @@
   // 长连接（聊天推送等）：本地没有服务端，给一个「已连上但不推消息」的假 socket，避免超时重连刷屏
   var RealWS = window.WebSocket;
   var LOCAL_REPLY =
-    "This is a local mirror of Daily Picks, so Migoo does not generate real replies here.\n\n（本地镜像：消息已发出，但不会生成真实回复。）";
+    "This is a local mirror of Daily Picks, so Okiee does not generate real replies here.\n\n（本地镜像：消息已发出，但不会生成真实回复。）";
   // 本地会话记录：Explore / Chat 里发出的消息和本地回复（localStorage 的 mock:chat-log）
   var CHAT_LOG_KEY = "mock:chat-log";
   function readChatLog() {

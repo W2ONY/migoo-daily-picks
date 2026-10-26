@@ -334,7 +334,7 @@
     if (it.says.rest) {
       var says = el("div", "lv-wz-says");
       var h = el("div", "lv-wz-says-head");
-      h.innerHTML = svg(ICON.spark) + "<span>Migoo says...</span>";
+      h.innerHTML = svg(ICON.spark) + "<span>Okiee says...</span>";
       says.appendChild(h);
       var q = el("div", "lv-wz-quote");
       q.appendChild(document.createTextNode("“"));

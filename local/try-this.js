@@ -251,7 +251,7 @@
           ? "| Store | Price | Coupon | You pay |\n|---|---|---|---|"
           : "| Store | Price | Coupon | Shipping | Total |\n|---|---|---|---|---|";
       var tip =
-        "**Migoo's pick:** buy at " +
+        "**Okiee's pick:** buy at " +
         best.name +
         (best.coupon
           ? " and clip the $" + best.coupon.off + " coupon first"
@@ -506,8 +506,8 @@
             ? sh.storeName(p.store) + " only"
             : "All stores") +
           (q.opts.notify === "email"
-            ? " · Migoo + email"
-            : " · Notify in Migoo"),
+            ? " · Okiee + email"
+            : " · Notify in Okiee"),
       ),
     );
     return c;
@@ -1179,7 +1179,7 @@
           "b",
           null,
           state.photo
-            ? "Migoo will identify the product and find it in every store"
+            ? "Okiee will identify the product and find it in every store"
             : p.info.title,
         ),
       );
@@ -1306,7 +1306,7 @@
     title: "Compare prices",
     leftTitle: "Compare prices in one click",
     leftCopy:
-      "Drop a product link and Migoo checks every store — price, coupons and shipping — to find the lowest total.",
+      "Drop a product link and Okiee checks every store — price, coupons and shipping — to find the lowest total.",
     go: "Compare prices",
     opts: function () {
       return { stores: [], mode: "total", coupons: true };
@@ -1325,7 +1325,7 @@
     title: "Track price drops",
     leftTitle: "Never miss a price drop",
     leftCopy:
-      "Pick a product and a target price. Migoo watches it every day and tells you the moment it gets there.",
+      "Pick a product and a target price. Okiee watches it every day and tells you the moment it gets there.",
     go: "Start tracking",
     opts: function () {
       return { scope: "any", freq: "daily", notify: "app" };
@@ -1420,7 +1420,7 @@
     title: "Shop within budget",
     leftTitle: "Get more for every dollar",
     leftCopy:
-      "Tell Migoo what you need and how much you want to spend. Every pick fits the budget — best value first.",
+      "Tell Okiee what you need and how much you want to spend. Every pick fits the budget — best value first.",
     go: "Find picks",
     opts: function () {
       return { sort: "value" };
@@ -1522,7 +1522,7 @@
     title: "Find shopping ideas",
     leftTitle: "Ideas worth giving",
     leftCopy:
-      "Say who it's for and the occasion. Migoo mixes practical picks with fun surprises — all at good prices.",
+      "Say who it's for and the occasion. Okiee mixes practical picks with fun surprises — all at good prices.",
     go: "Get ideas",
     opts: function () {
       return { budget: 0 };
@@ -1566,7 +1566,7 @@
       );
       main.appendChild(occ);
       body.appendChild(main);
-      extraSection(body, "Tell Migoo more, e.g. loves golf and coffee (optional)");
+      extraSection(body, "Tell Okiee more, e.g. loves golf and coffee (optional)");
     },
     ready: function () {
       return !!state.who;
@@ -1758,7 +1758,7 @@
           " · " +
           (t.scope === "store" ? sh.storeName(p.store) + " only" : "All stores") +
           " · " +
-          (t.notify === "email" ? "Migoo + email" : "Notify in Migoo") +
+          (t.notify === "email" ? "Okiee + email" : "Notify in Okiee") +
           (t.note ? " · " + t.note : ""),
       ),
     );

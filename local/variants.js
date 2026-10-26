@@ -333,8 +333,8 @@
     ext.href = EXT_URL;
     ext.target = "_blank";
     ext.rel = "noopener";
-    ext.title = "Migoo for Chrome · Best price check on any product page";
-    ext.innerHTML = CHROME_LOGO + "<span>Add Migoo to Chrome</span>";
+    ext.title = "Okiee for Chrome · Best price check on any product page";
+    ext.innerHTML = CHROME_LOGO + "<span>Add Okiee to Chrome</span>";
     left.appendChild(tabs);
     bar.appendChild(left);
     var right = el("div", "lv-right");
@@ -659,7 +659,11 @@
   }
   function mountRail() {
     rail = el("nav", "lv-rail");
-    var logo = el("button", "lv-rail-logo", "migoo");
+    var logo = el(
+      "button",
+      "lv-rail-logo",
+      '<img class="lv-brand-logo" src="' + (window.LV_BASE || "") + '/local/okiee-logo.png" alt="Okiee">',
+    );
     logo.type = "button";
     logo.onclick = function () {
       go("/daily-picks");
@@ -722,8 +726,8 @@
     ext.href = EXT_URL;
     ext.target = "_blank";
     ext.rel = "noopener";
-    ext.title = "Migoo for Chrome · Best price check on any product page";
-    ext.innerHTML = CHROME_LOGO + "<span>Add Migoo to Chrome</span>";
+    ext.title = "Okiee for Chrome · Best price check on any product page";
+    ext.innerHTML = CHROME_LOGO + "<span>Add Okiee to Chrome</span>";
     document.body.appendChild(ext);
   }
   var CHATS_KEY = "local:shopping-chats";

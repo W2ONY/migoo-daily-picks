@@ -4544,3 +4544,24 @@ body:has(aside[class*='_drawer_'][class*='_open_']) .lv-drawer-tab {
   transform: scale(0.7);
   pointer-events: none;
 }
+
+/* ---------- 品牌换成 Okiee：logo 用 local/okiee-logo.png ---------- */
+.lv-brand-logo {
+  display: block;
+  object-fit: contain;
+}
+.lv-rail-logo .lv-brand-logo {
+  width: 36px;
+  height: 36px;
+}
+.lv-drawer-title .lv-brand-logo {
+  width: 22px;
+  height: 22px;
+}
+/* PDP 右下角 Ask 按钮原来是 Migoo 吉祥物 SVG：藏掉图形，换成 Okiee logo */
+[class*='_askMigooIcon_'] {
+  background: url('/migoo-daily-picks/local/okiee-logo.png') center / contain no-repeat;
+}
+[class*='_askMigooIcon_'] > * {
+  display: none;
+}

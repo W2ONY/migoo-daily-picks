@@ -13,7 +13,7 @@
   // 首屏标题：替换原「Best Price for All Purchases」（原 h2 用 CSS 隐藏，新标题插在它前面）
   function buildTitle() {
     title = el("h1", "lv-title");
-    title.innerHTML = 'migoo finds deals. <em>You save.</em>';
+    title.innerHTML = 'Okiee finds deals. <em>You save.</em>';
   }
   function mountTitle(h) {
     var group = h.querySelector('[class*="_headingGroup_"]');
