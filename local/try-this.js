@@ -3,7 +3,7 @@
  * 左侧示意图 + 一句话说明，右侧是这一项的主输入 + 一行可选补充 + 选项 chips，底部主按钮。
  *   compare  Compare Prices          选商品（贴链接 / 照片 / 看过的）→ 多门店报价表 + 门店报价卡
  *   track    Track Price Drops       选商品 + 目标价 → 降价提醒卡 + 商品卡
- *   budget   Shop Within Your Budget 想买什么 + 预算 → 预算内的商品卡
+ *   budget   Shop Within Budget       想买什么 + 预算 → 预算内的商品卡
  *   ideas    Find Shopping Ideas     送给谁 + 场合 → 灵感商品卡
  * 提交：需要商品的项把商品作为引用附件放进输入坞（同 Claim now），再发 query，跳进会话页；回复是本地 mock。
  * 依赖 categories.js 暴露的 window.lvShop（商品池与工具函数）；回复钩子在原有 mockReplyFor 等外面包一层。
@@ -605,7 +605,7 @@
                 ". Want to raise the budget a little?"
               : "I couldn't find any " +
                 q.what +
-                " yet. Try another wording, or pick a category in Shop Within Your Budget.",
+                " yet. Try another wording, or pick a category in Shop Within Budget.",
           ],
         };
       }
@@ -1514,7 +1514,7 @@
   ];
   BUDGET.ui = {
     theme: "budget",
-    title: "Shop within your budget",
+    title: "Shop within budget",
     leftTitle: "Get more for every dollar",
     leftCopy:
       "Tell Migoo what you need and how much you want to spend. Every pick fits the budget — best value first.",
