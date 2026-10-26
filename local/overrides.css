@@ -1825,16 +1825,18 @@
   }
 }
 /* 思考气泡浮在 Chat 输入框上方（位置由 chat-cards.js 计算） */
+/* Migoo 式加载气泡：和回复气泡同色的灰底圆角气泡，里面三个灰点依次起伏 */
 .lv-think {
   position: fixed;
   z-index: 940;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
-  padding: 10px 16px 10px 12px;
-  border-radius: 20px;
-  background: #f1f2f5;
+  gap: 12px;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 18px;
+  border-radius: 22px;
+  background: #f2f3f5;
   font-family: Inter, -apple-system, sans-serif;
   font-size: 14px;
   color: #5c6370;
@@ -1852,10 +1854,10 @@
   gap: 4px;
 }
 .lv-think-orb span {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: #2f6bff;
+  background: #8a8f98;
   animation: lv-dot 1s ease-in-out infinite;
 }
 .lv-think-orb span:nth-child(2) {
@@ -1904,7 +1906,8 @@
 .chat-blocks.lv-reply-in {
   animation: lv-think-in 0.4s ease both;
 }
-.chat-blocks.lv-reply-in .lv-dd-card {
+.chat-blocks.lv-reply-in .lv-dd-card,
+.chat-blocks.lv-reply-in .lv-chat-grid > * {
   animation: lv-card-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   animation-delay: calc(0.25s + var(--i, 0) * 0.09s);
 }
@@ -2388,7 +2391,7 @@
   width: auto;
 }
 
-/* Big Price Drops 卡片左上角：与用户的关系标签（Watching / Viewed / Saved） */
+/* Price Drops 卡：与用户的关系标签（Tracking / Liked / Viewed） */
 .lv-steal-rel {
   display: inline-flex;
   align-items: center;
@@ -2403,16 +2406,21 @@
   width: 13px;
   height: 13px;
 }
-.lv-steal-rel-watching {
-  background: #e8efff;
+/* 三种关系标签都用浅色线框（不填底），只做标识、不像按钮 */
+.lv-steal-rel {
+  border: 1px solid transparent;
+  background: transparent;
+}
+.lv-steal-rel-tracking {
+  border-color: #b8ccfb;
   color: #2f6bff;
 }
 .lv-steal-rel-viewed {
-  background: #eef0f3;
-  color: #5c6370;
+  border-color: #d9dce1;
+  color: #6b7079;
 }
-.lv-steal-rel-saved {
-  background: #fdebf1;
+.lv-steal-rel-liked {
+  border-color: #f6c2d4;
   color: #e0457b;
 }
 
@@ -4031,7 +4039,7 @@
   color: #1f2329;
 }
 
-/* Big Price Drops 卡：电商大卡样式（同会话里的 Figma 大卡），保留走势线；覆盖上面的旧卡样式 */
+/* Price Drops 卡：电商大卡样式（同会话里的 Figma 大卡），保留走势线；覆盖上面的旧卡样式 */
 .lv-steal {
   padding: 0;
   border: 1px solid rgba(142, 142, 147, 0.2);
@@ -4107,6 +4115,50 @@
   grid-template-columns: repeat(auto-fill, 260px);
   justify-content: space-between;
 }
-.lv-steal-rel-none {
-  visibility: hidden;
+
+/* 会话页：发出消息后列表底部补的空白（chat-cards.js 按需算出高度），让这条消息能滚到顶部 */
+[data-lv-turn] {
+  padding-bottom: var(--lv-turn-pad, 0px);
+}
+
+/* 会话里「More good prices / More good savings」的回复：卡片和 Explore 外面一致，网格排列 */
+.lv-chat-grid {
+  display: grid;
+  gap: 12px;
+}
+.lv-chat-steals {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+.lv-chat-steals .lv-steal {
+  width: auto;
+}
+.lv-chat-coupons {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  padding-top: 10px;
+}
+.lv-chat-coupons .lv-coupon {
+  width: auto;
+}
+
+/* 发送 → 会话的过场：代发 query 时藏起首页输入坞（categories.js sendQuery），避免展开、填字的闪烁 */
+[data-lv-sending] [class*='_dockLayer_'] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+/* 加载气泡只放三个点：左右对称的小气泡 */
+.lv-think {
+  padding: 0 20px;
+}
+/* 回复里的券卡（领券后）也跟着渐入 */
+.chat-blocks.lv-reply-in .lv-wz-lead {
+  animation: lv-card-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+}
+/* 加载气泡还在时，这一轮已经渲染出来的回复先藏着（chat-cards.js markTurn） */
+.chat-blocks.lv-reply-hold {
+  visibility: hidden !important;
+}
+/* 新发出的消息在历史滚出视图前先藏着，滚完再浮起渐入（chat-cards.js introTurn） */
+.chat-blocks-group.lv-sent-hold {
+  opacity: 0;
 }

@@ -55,26 +55,35 @@
     if (isHero()) document.body.setAttribute("data-daily-picks-input-entry", "");
     else document.body.removeAttribute("data-daily-picks-input-entry");
   }
-  // 方案三（原方案四/五）样式分支（localStorage local:v4-layout）：grid = 折叠（多行 + See more，默认），scroll = 横滑
+  // 方案三（原方案四/五）样式分支（localStorage local:v4-layout）：
+  //   chat = 对话（默认）：分区和「折叠」一样只露一行，底部按钮改为进对话（More good prices / More good savings）
+  //   grid = 折叠：多行网格 + See more 展开；scroll = 横滑
+  // <html data-lv-layout> 只有 scroll / grid 两种排版（对话也按 grid 排），对话另加 data-lv-more="chat"
   var V4_LAYOUTS = [
     { id: "scroll", name: "横滑" },
     { id: "grid", name: "折叠" },
+    { id: "chat", name: "对话" },
   ];
   function v4Layout() {
+    var v = null;
     try {
-      return localStorage.getItem("local:v4-layout") === "scroll" ? "scroll" : "grid";
-    } catch (e) {
-      return "grid";
-    }
+      v = localStorage.getItem("local:v4-layout");
+    } catch (e) {}
+    return v === "scroll" || v === "grid" ? v : "chat";
+  }
+  function markLayout(id) {
+    root.setAttribute("data-lv-layout", id === "scroll" ? "scroll" : "grid");
+    if (id === "chat") root.setAttribute("data-lv-more", "chat");
+    else root.removeAttribute("data-lv-more");
   }
   function setV4Layout(id) {
     try {
       localStorage.setItem("local:v4-layout", id);
     } catch (e) {}
-    root.setAttribute("data-lv-layout", id);
+    markLayout(id);
     window.dispatchEvent(new Event("local:layout"));
   }
-  root.setAttribute("data-lv-layout", v4Layout());
+  markLayout(v4Layout());
 
   function apply(v) {
     markVariant(v);
@@ -719,7 +728,7 @@
   /* ---------- 方案四：Explore 图标 hover 出分区导航（同 Recent chats 浮层样式），点击定位到对应分区 ---------- */
   var EXPLORE_SECTIONS = [
     { key: "shopping", label: "Shopping for" },
-    { key: "tracker", label: "Big Price Drops" },
+    { key: "tracker", label: "Price Drops" },
     { key: "coupons", label: "Big Savings" },
     { key: "browse", label: "Deals for You" },
   ];

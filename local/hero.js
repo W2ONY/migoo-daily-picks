@@ -196,6 +196,51 @@
       mount();
     }, 150);
   }
+  // 离开 Explore 时记住滚动位置，从会话页返回（返回按钮 / 浏览器后退 / 窄栏）时恢复到原来的浏览位置
+  // 信息流是分页加载的，回来时可能还不够长：反复设到目标位置（滚到底会触发加载下一页），最多 3s；
+  // 到位后再守 1.2s：Explore 的分区是稍后插回来的，浏览器的滚动锚定会把位置往下推。用户自己滚动就停
+  var EXPLORE = /^\/daily-picks\/?$/;
+  var exploreTop = 0;
+  var savedTop = null;
+  var wasExplore = EXPLORE.test(lvPath());
+  var restoring = false;
+  function trackExplore() {
+    if (restoring || !EXPLORE.test(lvPath()) || !header()) return;
+    var sc = scroller();
+    if (sc) exploreTop = sc.scrollTop;
+  }
+  function restoreExplore(top) {
+    var until = Date.now() + 3000;
+    var holdUntil = 0;
+    restoring = true;
+    var stop = function () {
+      restoring = false;
+      ["wheel", "touchmove", "keydown"].forEach(function (t) {
+        window.removeEventListener(t, stop, true);
+      });
+    };
+    ["wheel", "touchmove", "keydown"].forEach(function (t) {
+      window.addEventListener(t, stop, true);
+    });
+    (function tick() {
+      if (!restoring) return;
+      var sc = header() && scroller();
+      if (sc) {
+        if (Math.abs(sc.scrollTop - top) >= 2) sc.scrollTop = top;
+        if (Math.abs(sc.scrollTop - top) < 2 && !holdUntil) holdUntil = Date.now() + 1200;
+      }
+      var now = Date.now();
+      if ((holdUntil && now > holdUntil) || now > until) return stop();
+      setTimeout(tick, 40);
+    })();
+  }
+  function onRoute() {
+    var now = EXPLORE.test(lvPath());
+    if (wasExplore && !now) savedTop = exploreTop;
+    if (!wasExplore && now && savedTop) restoreExplore(savedTop);
+    wasExplore = now;
+  }
+
   function boot() {
     new MutationObserver(schedule).observe(document.body, {
       childList: true,
@@ -206,10 +251,21 @@
     document.addEventListener(
       "scroll",
       function () {
+        trackExplore();
         layout();
       },
       true,
     );
+    // 路由切换：页面用 history.pushState / popstate，两种都接上
+    ["pushState", "replaceState"].forEach(function (m) {
+      var orig = history[m];
+      history[m] = function () {
+        var r = orig.apply(this, arguments);
+        onRoute();
+        return r;
+      };
+    });
+    window.addEventListener("popstate", onRoute);
     schedule();
   }
   if (document.body) boot();

@@ -420,9 +420,12 @@
   // 给 chat-cards.js：一句回复 → 要渲染的合集商品（引导语或「under $50」筛选后的引导语）
   window.lvCollectionForText = function (text) {
     text = (text || "").trim();
-    for (var k = 0; k < COUPONS.length; k++) {
-      if (text === couponIntro(COUPONS[k])) {
-        var cp = COUPONS[k];
+    if (text === moreDealsIntro(moreDeals())) return { title: "More good prices", items: [], followUps: [], render: dealsBlock };
+    if (text === moreCouponsIntro()) return { title: "More good savings", items: [], followUps: [], render: couponsBlock };
+    var coupons = allCoupons();
+    for (var k = 0; k < coupons.length; k++) {
+      if (text === couponIntro(coupons[k])) {
+        var cp = coupons[k];
         return {
           title: storeName(cp.store) + " coupon deals",
           items: couponItems(cp),
@@ -467,7 +470,9 @@
   /* ---------- 「思考」动画的步骤文案与回复延迟（chat-cards.js / mock-api 调用） ---------- */
   window.lvThinkingFor = function (text) {
     text = (text || "").trim();
-    if (text === CLAIM_TEXT) return ["Claiming your coupon…", "Checking which items it works on…", "Applying it at checkout…"];
+    if (text === CLAIM_TEXT || couponByClaimText(text)) return ["Claiming your coupon…", "Checking which items it works on…", "Applying it at checkout…"];
+    if (text === MORE_DEALS_TEXT) return ["Scanning price history across stores…", "Picking the biggest drops…"];
+    if (text === MORE_COUPONS_TEXT) return ["Checking stores for live coupons…", "Keeping the ones you can use…"];
     for (var i = 0; i < COLLECTIONS.length; i++) {
       var c = COLLECTIONS[i];
       if (text === c.query) return c.thinking;
@@ -559,12 +564,19 @@
   window.mockReplyFor = function (text, frame) {
     text = (text || "").trim();
     var c, items, m;
-    if (text === CLAIM_TEXT) {
-      var cp = frame && couponFromFrame(frame);
+    if (text === MORE_DEALS_TEXT)
+      return [
+        textBlock(moreDealsIntro(moreDeals())),
+        textBlock("Each price is compared with the item's 30-day high. Tap a card to see its full price history."),
+      ];
+    if (text === MORE_COUPONS_TEXT)
+      return [textBlock(moreCouponsIntro()), textBlock("Tap **Claim now** on any of them and I'll apply it at checkout.")];
+    if (text === CLAIM_TEXT || couponByClaimText(text)) {
+      var cp = couponByClaimText(text) || (frame && couponFromFrame(frame));
       if (!cp) return [textBlock("Which coupon would you like to claim? Tap Claim now on a coupon in Big Savings.")];
       return [
         textBlock(couponIntro(cp)),
-        textBlock("Saved to your account — " + cp.desc.charAt(0).toLowerCase() + cp.desc.slice(1) + ". It applies automatically at checkout, no need to copy the code."),
+        textBlock("Saved to your account: " + cp.desc + ". It applies automatically at checkout, no need to copy the code."),
       ];
     }
     for (var i = 0; i < COLLECTIONS.length; i++) {
@@ -663,10 +675,24 @@
   function sendQuery(text) {
     var layer = document.querySelector('[class*="_dockLayer_"]');
     var editor = layer && layer.querySelector(".ProseMirror");
+    // 会话页（如在回复里的券卡上点 Claim now）没有 Daily Picks 输入坞，用会话输入框
+    if (!editor) {
+      var all = document.querySelectorAll(".ProseMirror");
+      editor = all[all.length - 1];
+      layer = null;
+    }
     if (!editor) return;
+    // 代发 query 时把 Daily Picks 输入坞整个藏起来：展开 / 填字 / 回车的过程不让用户看到，直接切到会话页
+    if (layer) {
+      root.setAttribute("data-lv-sending", "");
+      clearTimeout(sendQuery._t);
+      sendQuery._t = setTimeout(function () {
+        root.removeAttribute("data-lv-sending");
+      }, 2500);
+    }
     // 输入坞收成胶囊时编辑器是隐藏的、聚焦不了：先展开再输入
     var wait = 0;
-    if (layer.hasAttribute("data-lv-compact")) {
+    if (layer && layer.hasAttribute("data-lv-compact")) {
       layer.removeAttribute("data-lv-compact");
       wait = 120;
     }
@@ -753,14 +779,17 @@
   }
   function openPdpFor(p) {
     markViewed(p.id);
-    if (!window.__lvOpenPdp) return;
-    window.__lvOpenPdp({ offerId: p.info.offer_id, cspuId: p.id, region: p.info.region || "US", productId: p.id });
+    // 直接进会话页时 Daily Picks 模块（暴露 openPdp 的 local-patch）还没加载，按需 import 一次
+    var ready = window.__lvOpenPdp ? Promise.resolve() : import((window.LV_BASE || "") + "/migoo-daily-picks/assets/js/index-B8tGR6gk.js");
+    ready.then(function () {
+      if (window.__lvOpenPdp) window.__lvOpenPdp({ offerId: p.info.offer_id, cspuId: p.id, region: p.info.region || "US", productId: p.id });
+    });
   }
   // 卡片与用户的关系：Saved = 真实收藏（mock:likes）；Viewed = 在这里点开过详情（local:viewed，本地记录）；
   // 没有历史时按商品 id 确定性地 mock 一部分 Watching / Viewed，保证多数卡片都有标签；都不是就不显示
   var REL_ICONS = {
-    saved: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7.5 4.2 4.2 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10Z" fill="currentColor"/></svg>',
-    watching:
+    liked: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7.5 4.2 4.2 0 0 1 19.5 10c0 5.6-7.5 10-7.5 10Z" fill="currentColor"/></svg>',
+    tracking:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
     viewed:
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>',
@@ -781,17 +810,16 @@
       localStorage.setItem("local:viewed", JSON.stringify(list.slice(0, 50)));
     } catch (e) {}
   }
-  function relationOf(p) {
-    if (likedIds().indexOf(p.buybox) >= 0) return { kind: "saved", label: "Saved" };
+  // 每张卡都有关系标签：前 4 张固定 Tracking（蓝色实底，最显眼）；其余按真实收藏 / 浏览，没有就按 id 播种三选一
+  function relationOf(p, i) {
+    var tracking = { kind: "tracking", label: "Tracking" };
+    if (i < 4) return tracking;
+    if (likedIds().indexOf(p.buybox) >= 0) return { kind: "liked", label: "Liked" };
     if (viewedIds().indexOf(p.id) >= 0) return { kind: "viewed", label: "Viewed" };
-    var r = seeded(p.id + "rel", 4);
-    if (r === 0) return { kind: "watching", label: "Watching" };
-    if (r === 1) return { kind: "viewed", label: "Viewed" };
-    if (r === 2) return { kind: "saved", label: "Saved" };
-    return null;
+    return [tracking, { kind: "liked", label: "Liked" }, { kind: "viewed", label: "Viewed" }][seeded(p.id + "rel", 3)];
   }
 
-  // Big Price Drops 卡：电商大卡样式（整幅商品图 + 关系标签 / 一行标题 / 卖点 / 价格），保留 30 天价格走势线
+  // Price Drops 卡：电商大卡样式（整幅商品图 + 关系标签 / 一行标题 / 卖点 / 价格），保留 30 天价格走势线
   function stealCard(p, i, total) {
     var b = el("div", "lv-steal");
     b.setAttribute("role", "button");
@@ -804,18 +832,12 @@
     media.appendChild(img);
     b.appendChild(media);
     var body = el("span", "lv-steal-body");
-    // 关系标签（Viewed / Saved / Watching）放在图下、标题上方
-    var rel = relationOf(p);
-    if (rel) {
-      var tag = el("span", "lv-steal-rel lv-steal-rel-" + rel.kind);
-      tag.innerHTML = REL_ICONS[rel.kind];
-      tag.appendChild(el("span", null, rel.label));
-      body.appendChild(tag);
-    } else {
-      // 没有关系标签也占同样高度，同一行卡片的标题、价格对齐
-      var gap = el("span", "lv-steal-rel lv-steal-rel-none", "·");
-      body.appendChild(gap);
-    }
+    // 关系标签（Tracking / Liked / Viewed）放在图下、标题上方
+    var rel = relationOf(p, i);
+    var tag = el("span", "lv-steal-rel lv-steal-rel-" + rel.kind);
+    tag.innerHTML = REL_ICONS[rel.kind];
+    tag.appendChild(el("span", null, rel.label));
+    body.appendChild(tag);
     body.appendChild(el("span", "lv-steal-title", shortTitle(p.info.title)));
     body.appendChild(el("span", "lv-steal-sub", storeName(p.store) + " · save " + fmt(p.max - p.price)));
     var prices = el("span", "lv-steal-prices");
@@ -847,20 +869,21 @@
     if (list.length < 3) return null;
     var box = el("div", "lv-tracker");
     var head = el("div", "lv-tracker-head");
-    head.appendChild(el("h2", "lv-cats-heading lv-tracker-heading", "Big Price Drops"));
+    head.appendChild(el("h2", "lv-cats-heading lv-tracker-heading", "Price Drops"));
     box.appendChild(head);
     var row = el("div", "lv-tracker-row");
     list.forEach(function (p, i) {
       row.appendChild(stealCard(p, i, list.length));
     });
-    box.appendChild(scrollWrap(row));
+    box.appendChild(scrollWrap(row, { label: "More good prices", query: MORE_DEALS_TEXT }));
     return box;
   }
   // 横向滚动行 + 左右箭头（样式复用分类卡那一套）
-  function scrollWrap(row) {
+  // chat：「对话」样式下底部按钮的文案与要发的 query（不传就仍是 See more 展开）
+  function scrollWrap(row, chat) {
     var wrap = el("div", "lv-cats-rowwrap");
     wrap.appendChild(row);
-    registerGrid(wrap, row);
+    registerGrid(wrap, row, chat);
     ["prev", "next"].forEach(function (dir) {
       var a = el("button", "lv-cats-arrow lv-cats-arrow-" + dir);
       a.type = "button";
@@ -898,6 +921,69 @@
     { store: "dickssportinggoods", big: "20%", unit: "off", desc: "One full-price item, sporting & outdoor", code: "DSG20", hours: 11.4 },
     { store: "costco", big: "$30", unit: "off", desc: "Online-only savings on electronics $300+", code: "CSTCO30", hours: 52.9 },
   ];
+  // 「More good savings」进对话后推荐的更多券（外面 Big Savings 里没有的）
+  var MORE_COUPONS = [
+    { store: "adidas", big: "30%", unit: "off", desc: "Running shoes and apparel, members only", code: "RUN30AD", hours: 26.4 },
+    { store: "llbean", big: "$20", unit: "off", desc: "Outerwear and bags on orders $100+", code: "LLB20OFF", hours: 61.2 },
+    { store: "wayfair", big: "15%", unit: "off", desc: "Storage and organization, first order", code: "WF15ORG", hours: 8.9 },
+    { store: "chewy", big: "$15", unit: "off", desc: "Pet food and treats on orders $49+", code: "CHEWY15", hours: 33.6 },
+    { store: "kroger", big: "$5", unit: "off", desc: "Pantry and snacks, digital coupon", code: "KR5SNACK", hours: 5.4 },
+    { store: "target", big: "$10", unit: "off", desc: "Target Circle: home & kitchen $50+", code: "TGT10HOME", hours: 40.1 },
+  ];
+  function allCoupons() {
+    return COUPONS.concat(MORE_COUPONS);
+  }
+  // 方案三「对话」样式：分区底部按钮发的 query
+  var MORE_DEALS_TEXT = "Find me more good prices like these";
+  var MORE_COUPONS_TEXT = "Find me more coupons I can use";
+  var MORE_DEALS_SIZE = 8;
+  // Price Drops 外面展示的是降幅前 TRACKER_SIZE 件，对话里接着往后给
+  function moreDeals() {
+    var drops = products()
+      .filter(function (p) {
+        return p.drop && p.chart.length;
+      })
+      .sort(byDrop);
+    var rest = drops.slice(TRACKER_SIZE, TRACKER_SIZE + MORE_DEALS_SIZE);
+    return rest.length >= 4 ? rest : drops.slice(0, MORE_DEALS_SIZE);
+  }
+  function moreDealsIntro(items) {
+    return "Here are " + items.length + " more good prices — up to " + items[0].drop + "% below their recent high";
+  }
+  function moreCouponsIntro() {
+    return "Found " + MORE_COUPONS.length + " more coupons you can claim right now";
+  }
+  // 会话里的券卡点 Claim now：会话输入框挂不了附件，直接用文字说明是哪张券
+  function claimText(cp) {
+    return "Claim the " + storeName(cp.store) + " " + cp.big + " off coupon and apply it";
+  }
+  function couponByClaimText(text) {
+    return allCoupons().filter(function (cp) {
+      return claimText(cp) === text;
+    })[0];
+  }
+  // 会话里以「外面一样的卡」展示：降价卡网格 / 券卡网格
+  function dealsBlock() {
+    var box = el("div", "lv-chat-grid lv-chat-steals");
+    moreDeals().forEach(function (p, i) {
+      // 序号从 4 起：前 4 个固定 Tracking 的规则只给 Explore 首行
+      box.appendChild(stealCard(p, i + 4, MORE_DEALS_SIZE));
+    });
+    return box;
+  }
+  function couponsBlock() {
+    var box = el("div", "lv-chat-grid lv-chat-coupons");
+    MORE_COUPONS.forEach(function (cp) {
+      box.appendChild(couponCard(cp));
+    });
+    var tick = setInterval(function () {
+      if (!box.isConnected) return clearInterval(tick);
+      [].forEach.call(box.querySelectorAll(".lv-coupon-timer"), function (t) {
+        t._label.textContent = countdown(t._hours);
+      });
+    }, 1000);
+    return box;
+  }
   var couponStart = Date.now();
   function storeLogo(store) {
     var hit = products().filter(function (p) {
@@ -956,7 +1042,7 @@
       var id = loc && (loc.offer_id || loc.offerId);
       if (id && /^coupon-/.test(id)) code = id.slice(7);
     });
-    return COUPONS.filter(function (c) {
+    return allCoupons().filter(function (c) {
       return c.code === code;
     })[0];
   }
@@ -1037,8 +1123,11 @@
     claim.type = "button";
     claim.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5V6a1.5 1.5 0 0 1 1.5-1.5h13A1.5 1.5 0 0 1 20 6v2.5a2.5 2.5 0 0 0 0 5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18v-4.5a2.5 2.5 0 0 0 0-5Z"/><path d="M10 9.5h4M10 14.5h4"/></svg><span>Claim now</span>';
-    claim.onclick = function () {
-      claimCoupon(cp);
+    claim.onclick = function (e) {
+      e.stopPropagation();
+      // 会话里（More good savings 的回复）直接在会话输入框发领取；Explore 上走带附件的 Claim 流程
+      if (/^\/(home|chat)/.test(window.lvPath())) sendQuery(claimText(cp));
+      else claimCoupon(cp);
     };
     right.appendChild(claim);
     c.appendChild(right);
@@ -1053,7 +1142,7 @@
     COUPONS.forEach(function (cp) {
       row.appendChild(couponCard(cp));
     });
-    box.appendChild(scrollWrap(row));
+    box.appendChild(scrollWrap(row, { label: "More good savings", query: MORE_COUPONS_TEXT }));
     // 倒计时走秒
     setInterval(function () {
       [].forEach.call(row.querySelectorAll(".lv-coupon-timer"), function (t) {
@@ -1071,22 +1160,39 @@
   function gridMode() {
     return root.getAttribute("data-lv-layout") === "grid";
   }
-  function registerGrid(wrap, row) {
+  // 方案三「对话」样式（<html data-lv-more="chat">）：只露一行，按钮换成 chat.label，点击发 chat.query 进对话
+  function chatMode() {
+    return root.getAttribute("data-lv-more") === "chat";
+  }
+  var ICON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+  var ICON_GO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12M13 7l5 5-5 5"/></svg>';
+  function registerGrid(wrap, row, chat) {
     var more = el("div", "lv-more");
     var btn = el("button", "lv-more-btn");
     btn.type = "button";
-    btn.innerHTML =
-      '<span>See more</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
     more.appendChild(btn);
     wrap.appendChild(more);
-    var g = { wrap: wrap, row: row, more: more, shown: 1 };
+    var g = { wrap: wrap, row: row, more: more, btn: btn, chat: chat, shown: 1 };
     btn.onclick = function () {
+      if (chatMode() && chat) {
+        sendQuery(chat.query);
+        return;
+      }
       g.shown += 1;
       layoutGrid(g);
     };
     grids.push(g);
   }
+  function moreLabel(g) {
+    var toChat = chatMode() && g.chat;
+    var key = toChat ? "chat" : "more";
+    if (g.btn._key === key) return;
+    g.btn._key = key;
+    g.btn.innerHTML = "<span></span>" + (toChat ? ICON_GO : ICON_DOWN);
+    g.btn.querySelector("span").textContent = toChat ? g.chat.label : "See more";
+  }
   function layoutGrid(g) {
+    moreLabel(g);
     if (!gridMode()) {
       g.row.style.maxHeight = "";
       g.wrap.classList.remove("has-more");

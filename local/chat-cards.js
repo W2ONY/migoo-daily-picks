@@ -450,7 +450,7 @@
     var body = el("div", "lv-big-body");
     body.appendChild(el("div", "lv-big-title", it.title));
     var pct = it.was && it.was > it.price ? Math.round((1 - it.price / it.was) * 100) : 0;
-    // 降幅不进卖点行，放到价格行：现价 + 划线原价 + 降幅胶囊（同 Big Price Drops 卡）；标签里的降幅文案也去掉免得重复
+    // 降幅不进卖点行，放到价格行：现价 + 划线原价 + 降幅胶囊（同 Price Drops 卡）；标签里的降幅文案也去掉免得重复
     var badge = (it.badge || "").replace(/\s*·?\s*[−-]?\d+%[^·]*/g, "").trim();
     var sub = [badge, it.rating ? "★ " + it.rating.value.toFixed(1) : ""].filter(Boolean);
     if (sub.length) body.appendChild(el("div", "lv-big-sub", sub.join(" · ")));
@@ -620,18 +620,28 @@
     return box;
   }
 
+  function customBlock(node, follows) {
+    var box = el("div", "lv-wz lv-wz-custom");
+    ["click", "mousedown", "contextmenu"].forEach(function (t) {
+      box.addEventListener(t, function (e) {
+        e.stopPropagation();
+      });
+    });
+    box.appendChild(node);
+    if (follows && follows.length) box.appendChild(followUpRow(follows));
+    return box;
+  }
   function scan() {
     if (!/^\/(home|chat)/.test(lvPath()) || !window.lvCollectionForText) return;
-    var fresh = freshHost();
-    if (fresh && !fresh.classList.contains("lv-reply-in")) fresh.classList.add("lv-reply-in");
     [].forEach.call(document.querySelectorAll(".chat-blocks .markdown-paragraph"), function (p) {
       var host = p.closest(".chat-blocks");
       if (!host || host.querySelector(".lv-wz")) return;
       var c = window.lvCollectionForText(p.textContent);
-      if (!c || !c.items.length) return;
-      var box = carousel(buildItems(c.items), c.title, c.followUps);
+      if (!c || (!c.items.length && !c.render)) return;
+      // render：回复里直接放和 Explore 外面一样的卡（Price Drops 降价卡 / Big Savings 券卡）
+      var box = c.render ? customBlock(c.render(), c.followUps) : carousel(buildItems(c.items), c.title, c.followUps);
       // 卡片序号给依次淡入用（只有带 lv-reply-in 的新回复才会播放，见 overrides.css）
-      [].forEach.call(box.querySelectorAll(".lv-dd-card"), function (card, n) {
+      [].forEach.call(box.querySelectorAll(".lv-dd-card, .lv-chat-grid > *"), function (card, n) {
         card.style.setProperty("--i", n);
       });
       if (c.lead) {
@@ -648,17 +658,21 @@
     });
   }
 
-  /* ---------- 发送动效 + Migoo「思考」动画 ----------
-   * 假 socket 发出消息（mock:ws-send）→ 等进到 Chat 页：最新的用户气泡加上浮动效；
-   * 输入框上方浮出思考气泡，逐步轮播文案；步骤走完才放出回复（mockReplyGate，mock-api 调用）。
-   * 回复到达（mock:ws-reply）→ 收起思考气泡；回复到达后新出现的回复气泡淡入、其商品卡依次淡入。 */
+  /* ---------- 发送 → 会话的过场（所有方案、所有发 query 的入口共用） ----------
+   * 1. 发出（mock:ws-send）：记下这一轮的起点时间；
+   * 2. 会话页第一次渲染出这条用户消息（data-timestamp ≥ 起点）时，在首次绘制前给它加浮起动画，
+   *    并把它直接放到会话区顶部（列表底部补空白，见 updateTurn）；
+   * 3. 气泡下方出现 Migoo 式加载气泡（灰底 + 三个点），LOADING_MS 后加载气泡消失、再放出回复（mockReplyGate，mock-api 调用）；
+   * 4. 回复第一次渲染时整条渐入，商品卡依次淡入（overrides.css 的 lv-reply-in）。
+   *    回复也可能不走 socket、随会话历史一起渲染出来（切页时 socket 重连），所以加载没结束前这一轮的回复一律先藏着（lv-reply-hold）。
+   * 新消息靠 data-timestamp 认（虚拟列表会重建节点，靠文字匹配会认错旧消息）。 */
   var CHAT_PATH = /^\/(home|chat)/;
-  var STEP_MS = 900;
+  var LOADING_MS = 2000;
+  var TURN_GAP = 24;
   var think = null;
   var thinkTimer = null;
   var gateResolve = null;
-  var gateText = "";
-  var freshUntil = 0;
+  var turn = null; // { text, ts, start, scrolled, loaded, replied }
   function userText(frame) {
     try {
       return JSON.parse(frame.message.customized_data)
@@ -674,27 +688,136 @@
       return "";
     }
   }
-  function newestSelfBubble(text) {
+  function stamp(g) {
+    return Number(g.getAttribute("data-timestamp")) || 0;
+  }
+  // 这一轮发出的用户消息节点
+  function turnSelf() {
+    if (!turn) return null;
     var best = null;
-    [].forEach.call(document.querySelectorAll(".chat-blocks-group.is-self"), function (b) {
-      if (b.textContent.trim() !== text) return;
-      if (!best || b.getBoundingClientRect().top > best.getBoundingClientRect().top) best = b;
+    [].forEach.call(document.querySelectorAll(".chat-blocks-group.is-self[data-timestamp]"), function (b) {
+      if (stamp(b) < turn.ts) return;
+      if (!best || stamp(b) > stamp(best)) best = b;
     });
     return best;
   }
-  // 思考气泡钉在 Chat 输入框上方、与消息列左对齐
+  function chatScroller() {
+    var track = document.querySelector('[class*="_messageContentTrack_"]');
+    var sc = track && track.parentElement;
+    return sc && /auto|scroll/.test(getComputedStyle(sc).overflowY) ? sc : null;
+  }
+  // 这一轮里拦住页面自带的「新内容滚到底」（它在回复、图片加载后会把消息顶出顶部）：
+  // 给滚动容器实例装一层 scrollTop / scrollTo，超过「消息贴顶」位置的程序滚动一律截住；
+  // 用户自己用滚轮 / 触控 / 键盘滚动时解除，下一轮发出时重新生效
+  var NATIVE_TOP = Object.getOwnPropertyDescriptor(Element.prototype, "scrollTop");
+  function pinLimit() {
+    return turn && turn.lock && turn.selfTop != null ? turn.selfTop - TURN_GAP : Infinity;
+  }
+  function lockScroller(sc) {
+    if (sc._lvLocked) return;
+    sc._lvLocked = true;
+    Object.defineProperty(sc, "scrollTop", {
+      configurable: true,
+      get: function () {
+        return NATIVE_TOP.get.call(this);
+      },
+      set: function (v) {
+        NATIVE_TOP.set.call(this, Math.min(v, pinLimit()));
+      },
+    });
+    var nativeTo = sc.scrollTo;
+    sc.scrollTo = function (a, b) {
+      if (a && typeof a === "object") return nativeTo.call(this, Object.assign({}, a, a.top != null ? { top: Math.min(a.top, pinLimit()) } : {}));
+      return nativeTo.call(this, a, Math.min(b, pinLimit()));
+    };
+    var release = function () {
+      if (turn) turn.lock = false;
+    };
+    ["wheel", "touchmove", "keydown", "mousedown"].forEach(function (t) {
+      sc.addEventListener(t, release, { passive: true });
+    });
+  }
+  // 把这一轮的用户消息放到会话区顶部：列表底部补空白（滚动容器 padding-bottom），
+  // 让「这条消息 + 加载气泡 / 回复」至少占满一屏；回复越长空白越少，超过一屏就不再补
+  function updateTurn() {
+    var sc = chatScroller();
+    if (!sc) return;
+    if (!turn || !CHAT_PATH.test(lvPath())) {
+      if (sc.hasAttribute("data-lv-turn")) {
+        sc.removeAttribute("data-lv-turn");
+        sc.style.removeProperty("--lv-turn-pad");
+      }
+      return;
+    }
+    // 消息在列表里的位置（内容坐标）记下来：它被虚拟列表回收（滚出屏幕）后也能接着算
+    var bubble = turnSelf();
+    if (bubble) turn.selfTop = bubble.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop;
+    if (turn.selfTop == null) return;
+    var curPad = parseFloat(sc.style.getPropertyValue("--lv-turn-pad")) || 0;
+    var contentEnd = sc.scrollHeight - curPad;
+    var pad = Math.max(0, Math.round(sc.clientHeight - (contentEnd - turn.selfTop) - TURN_GAP));
+    sc.setAttribute("data-lv-turn", "");
+    sc.style.setProperty("--lv-turn-pad", pad + "px");
+    lockScroller(sc);
+    // 开场的平滑滚动由 introTurn 负责；回复出现后的一小段时间里把这条消息钉在顶部
+    // （页面自带的「新消息滚到底」会把它顶出屏幕）
+    var target = turn.selfTop - TURN_GAP;
+    if (turn.revealed && Date.now() < turn.pinUntil && Math.abs(sc.scrollTop - target) > 2) NATIVE_TOP.set.call(sc, target);
+  }
+  // 开场：用户消息先藏着 → 把历史消息平滑滚出视图（这条消息的位置到顶）→ 消息渐入上屏 → 加载气泡
+  var INTRO_SCROLL_MS = 520;
+  function easeInOut(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+  function introTurn() {
+    if (!turn || turn.intro) return;
+    turn.intro = true;
+    updateTurn();
+    var sc = chatScroller();
+    var t = turn;
+    function reveal() {
+      if (t !== turn) return;
+      t.revealed = true;
+      var self = turnSelf();
+      if (self) {
+        self.classList.remove("lv-sent-hold");
+        self.classList.add("lv-sent");
+      }
+      // 消息浮起后再出加载气泡
+      setTimeout(function () {
+        if (t === turn) showThinking();
+      }, 260);
+    }
+    if (!sc || t.selfTop == null) return reveal();
+    var from = sc.scrollTop;
+    var to = t.selfTop - TURN_GAP;
+    // 窗口在后台时浏览器不跑动画帧，直接到位
+    if (Math.abs(to - from) < 4 || document.hidden) {
+      NATIVE_TOP.set.call(sc, to);
+      return reveal();
+    }
+    var start = performance.now();
+    (function step(now) {
+      if (t !== turn) return;
+      var k = Math.min(1, (now - start) / INTRO_SCROLL_MS);
+      NATIVE_TOP.set.call(sc, from + (to - from) * easeInOut(k));
+      if (k < 1) requestAnimationFrame(step);
+      else reveal();
+    })(start);
+  }
+  // 加载气泡跟在这一轮的用户消息下方、与消息列左对齐（就是回复将要出现的位置）
   function placeThink() {
     if (!think) return;
-    var editors = document.querySelectorAll(".ProseMirror");
-    var shell = editors.length && editors[editors.length - 1].closest(".composer-shell");
-    if (!shell || !CHAT_PATH.test(lvPath())) {
+    var bubble = CHAT_PATH.test(lvPath()) && turnSelf();
+    if (!bubble) {
       think.style.display = "none";
       return;
     }
-    var r = shell.getBoundingClientRect();
+    var track = bubble.closest('[class*="_messageContentTrack_"]');
+    var col = (track || bubble).getBoundingClientRect();
     think.style.display = "";
-    think.style.left = r.left + 4 + "px";
-    think.style.bottom = window.innerHeight - r.top + 14 + "px";
+    think.style.left = col.left + "px";
+    think.style.top = bubble.getBoundingClientRect().bottom + 20 + "px";
   }
   function stopThinking() {
     clearInterval(thinkTimer);
@@ -705,69 +828,85 @@
     if (gateResolve) gateResolve();
     gateResolve = null;
   }
-  window.mockReplyGate = function (text) {
+  window.mockReplyGate = function () {
     releaseGate();
-    gateText = text;
     return new Promise(function (resolve) {
+      // 加载气泡已经停够了就直接放出；兜底最多 6s
+      if (turn && turn.loaded) return resolve();
       gateResolve = resolve;
-      // 兜底：不管动画走没走完，最多 9s 放出回复
-      setTimeout(resolve, 9000);
+      setTimeout(resolve, 6000);
     });
   };
-  function startThinking(text) {
-    stopThinking();
-    var steps = (window.lvThinkingFor && window.lvThinkingFor(text)) || ["Thinking…"];
+  function showThinking() {
+    if (think || !turn || turn.loaded || turn.replied) return;
     think = el("div", "lv-think");
-    think.innerHTML =
-      '<span class="lv-think-orb"><span></span><span></span><span></span></span><span class="lv-think-text"></span>';
-    var label = think.querySelector(".lv-think-text");
-    label.textContent = steps[0];
-    var start = Date.now();
-    // 等进到 Chat 页、用户气泡渲染出来（最多等 6s）再开始
-    (function waitChat() {
-      if (!think) return;
-      var bubble = CHAT_PATH.test(lvPath()) && newestSelfBubble(text);
-      if (!bubble && Date.now() - start < 6000) return setTimeout(waitChat, 80);
-      if (bubble) bubble.classList.add("lv-sent");
-      document.body.appendChild(think);
+    think.innerHTML = '<span class="lv-think-orb"><span></span><span></span><span></span></span>';
+    document.body.appendChild(think);
+    placeThink();
+    thinkTimer = setInterval(function () {
+      updateTurn();
       placeThink();
-      var i = 0;
-      thinkTimer = setInterval(function () {
-        placeThink();
-        i += 1;
-        if (i < steps.length) {
-          label.classList.remove("is-in");
-          void label.offsetWidth;
-          label.textContent = steps[i];
-          label.classList.add("is-in");
-        } else if (gateText === text) releaseGate();
-      }, STEP_MS);
-    })();
+    }, 100);
+    var t = turn;
+    setTimeout(function () {
+      t.loaded = true;
+      if (t !== turn) return;
+      // 先收起加载气泡，再放出回复（已经渲染但藏着的回复在 markTurn 里转成渐入）
+      stopThinking();
+      markTurn();
+      releaseGate();
+    }, LOADING_MS);
+  }
+  // 这一轮新渲染出来的消息：在首次绘制前打上动画（MutationObserver 回调在绘制前执行）
+  function markTurn() {
+    if (!turn || Date.now() - turn.start > 15000 || !CHAT_PATH.test(lvPath())) return;
+    // 用户消息根节点是 .chat-blocks-group.is-self，回复根节点是 .chat-blocks，都带 data-testid="chat-message" 和 data-timestamp
+    [].forEach.call(document.querySelectorAll('[data-testid="chat-message"][data-timestamp]'), function (g) {
+      if (stamp(g) < turn.ts) return;
+      if (g.classList.contains("is-self")) {
+        // 上屏前先藏着（虚拟列表重建节点时也补上），滚完再渐入
+        if (!turn.revealed && !g.classList.contains("lv-sent-hold")) g.classList.add("lv-sent-hold");
+        introTurn();
+      } else if (!turn.loaded) {
+        g.classList.add("lv-reply-hold");
+      } else if (!g.classList.contains("lv-reply-in")) {
+        g.classList.remove("lv-reply-hold");
+        g.classList.add("lv-reply-in");
+        if (!turn.replied) {
+          turn.replied = true;
+          turn.pinUntil = Date.now() + 3000;
+        }
+      }
+    });
   }
   window.addEventListener("mock:ws-send", function (e) {
     var frame = e.detail || {};
     if (frame.type !== "send") return;
-    startThinking(userText(frame));
-  });
-  window.addEventListener("resize", placeThink);
-  // 回复到达后 3s 内：页面每次重渲染都把「最靠下、正文就是这次回复」的那条标成新回复（节点被重建也会重新标上）
-  var freshText = "";
-  window.addEventListener("mock:ws-reply", function (e) {
     stopThinking();
-    freshText = userText(e.detail || {});
-    freshUntil = Date.now() + 3000;
+    releaseGate();
+    // 起点往前留 1.5s 余量：消息时间戳由 mock 在发出时生成
+    turn = { text: userText(frame), ts: Date.now() - 1500, start: Date.now(), intro: false, revealed: false, loaded: false, replied: false, selfTop: null, pinUntil: 0, lock: true };
+    markTurn();
+  });
+  window.addEventListener("mock:ws-reply", function () {
+    if (turn) {
+      turn.replied = true;
+      turn.pinUntil = Date.now() + 3000;
+    }
+    stopThinking();
+    markTurn();
     schedule();
   });
-  function freshHost() {
-    if (Date.now() > freshUntil || !freshText) return null;
-    var best = null;
-    [].forEach.call(document.querySelectorAll(".chat-blocks"), function (b) {
-      var p = b.querySelector(".markdown-content");
-      if (!p || p.textContent.trim() !== freshText) return;
-      if (!best || b.getBoundingClientRect().top > best.getBoundingClientRect().top) best = b;
-    });
-    return best;
-  }
+  window.addEventListener("resize", placeThink);
+  // 会话列表滚动时加载气泡跟着用户消息走；回复刚出现时页面自己滚到底，这里拉回顶部
+  document.addEventListener(
+    "scroll",
+    function () {
+      if (turn && Date.now() < turn.pinUntil) updateTurn();
+      placeThink();
+    },
+    true,
+  );
 
   var pending = false;
   function schedule() {
@@ -776,10 +915,15 @@
     setTimeout(function () {
       pending = false;
       scan();
+      updateTurn();
     }, 120);
   }
   function boot() {
-    new MutationObserver(schedule).observe(document.body, {
+    new MutationObserver(function () {
+      markTurn();
+      if (turn && Date.now() < turn.pinUntil) updateTurn();
+      schedule();
+    }).observe(document.body, {
       childList: true,
       subtree: true,
     });
