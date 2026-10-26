@@ -4282,3 +4282,264 @@
   border-color: #c9cdd4;
   color: #1f2329;
 }
+
+/* ======================= 方案四：右侧会话窗（local/drawer.js） ======================= */
+.lv-drawer {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 2600;
+  width: min(460px, calc(100vw - 96px));
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(142, 142, 147, 0.2);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+  overflow: hidden;
+  transform: translateX(calc(100% + 24px));
+  transition:
+    transform 0.38s cubic-bezier(0.22, 0.8, 0.24, 1),
+    width 0.38s cubic-bezier(0.22, 0.8, 0.24, 1),
+    top 0.38s ease,
+    right 0.38s ease,
+    bottom 0.38s ease,
+    border-radius 0.38s ease;
+  font-family: Inter, -apple-system, sans-serif;
+}
+.lv-drawer.is-open {
+  transform: none;
+}
+/* 全屏：盖住整页（左侧窄栏除外） */
+.lv-drawer.is-full {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: calc(100vw - 64px);
+  border-radius: 0;
+  border-right: 0;
+}
+.lv-drawer-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 10px 0 16px;
+  border-bottom: 1px solid #f0f1f3;
+}
+.lv-drawer-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1f2329;
+}
+.lv-drawer-title svg {
+  width: 20px;
+  height: 20px;
+  color: #2f6bff;
+}
+.lv-drawer-title b {
+  font-size: 15px;
+  font-weight: 600;
+}
+.lv-drawer-actions {
+  display: flex;
+  gap: 4px;
+}
+.lv-drawer-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #4e5969;
+  cursor: pointer;
+}
+.lv-drawer-btn:hover {
+  background: #f2f3f5;
+  color: #1f2329;
+}
+.lv-drawer-btn svg {
+  width: 17px;
+  height: 17px;
+}
+.lv-drawer-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.lv-drawer-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.lv-drawer.is-loaded .lv-drawer-frame {
+  opacity: 1;
+}
+.lv-drawer-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.lv-drawer.is-loaded .lv-drawer-loading {
+  display: none;
+}
+.lv-drawer-loading span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8a8f98;
+  animation: lv-dot 1s ease-in-out infinite;
+}
+.lv-drawer-loading span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.lv-drawer-loading span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+/* 右下角的「Ask migoo」胶囊（原页面胶囊同款）：会话窗收起时随时拉开；Explore 上它就是收起的输入框 */
+.lv-drawer-tab {
+  position: fixed;
+  right: 24px;
+  bottom: 40px;
+  z-index: 2590;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 56px;
+  padding: 16px 24px 16px 20px;
+  border: 0;
+  border-radius: 100px;
+  background: #fff;
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.16);
+  color: rgba(0, 0, 0, 0.87);
+  font: inherit;
+  font-family: Inter, -apple-system, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transform-origin: center;
+  /* 出现：等输入框缩到这里再浮出 */
+  transition:
+    opacity 0.26s ease 0.2s,
+    transform 0.36s cubic-bezier(0.22, 0.8, 0.24, 1) 0.16s,
+    box-shadow 0.2s ease;
+}
+.lv-drawer-tab:hover {
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+.lv-drawer-tab svg {
+  flex: none;
+  width: 24px;
+  height: 24px;
+}
+/* 藏起：立刻淡出，让输入框从这里放大回去 */
+.lv-drawer-tab.is-hidden {
+  opacity: 0;
+  transform: scale(0.7);
+  pointer-events: none;
+  transition:
+    opacity 0.14s ease,
+    transform 0.2s ease;
+}
+/* 方案四只留右下角这一颗：原页面底部中间的胶囊不要 */
+[data-lv-drawer] [class*='_dockLayer_'] [class*='_pill_'] {
+  display: none !important;
+}
+/* 输入框收起：缩向右下角胶囊（位移由 drawer.js 算好）；展开时沿原路放大回来 */
+[data-lv-drawer] [class*='_dockLayer_'][data-lv-bottom] [class*='_dockPanel_'] {
+  transform-origin: center center !important;
+  transition:
+    opacity 0.32s ease,
+    transform 0.42s cubic-bezier(0.22, 0.8, 0.24, 1),
+    visibility 0s linear 0s !important;
+}
+[data-lv-drawer] [class*='_dockLayer_'][data-lv-bottom][data-lv-compact] [class*='_dockPanel_'] {
+  transform: translate(var(--lv-pill-dx, 0px), var(--lv-pill-dy, 0px)) scale(0.16) !important;
+  opacity: 0 !important;
+  transition:
+    opacity 0.3s ease 0.08s,
+    transform 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0s linear 0.42s !important;
+}
+/* 会话窗拉开时，方案切换球让到会话窗左边 */
+[data-lv-drawer-open] .lv-ball {
+  right: calc(min(460px, 100vw - 96px) + 28px) !important;
+}
+
+/* 嵌入页（会话窗里的会话页）：藏起窄栏、顶栏、返回、插件入口、方案球，内容占满 */
+[data-lv-embed] .lv-rail,
+[data-lv-embed] .lv-recent,
+[data-lv-embed] .lv-topbar,
+[data-lv-embed] .lv-back,
+[data-lv-embed] .lv-ext,
+[data-lv-embed] .lv-ball,
+[data-lv-embed] .lv-acct,
+[data-lv-embed] .home-header {
+  display: none !important;
+}
+/* 会话窗没拉到全屏时（窄）内容占满；全屏时沿用会话页的 1040px 居中 */
+@media (max-width: 1099px) {
+  [data-lv-embed] [class*='_messageContentTrack_'] {
+    max-width: 100% !important;
+  }
+  [data-lv-embed] .home-composer-panel {
+    max-width: 100% !important;
+  }
+  [data-lv-embed] .home-composer-panel .composer-shell {
+    max-width: 100% !important;
+  }
+}
+/* 原页面 body 有 736px 最小宽度，会话窗里放不下 */
+[data-lv-embed] body {
+  min-width: 0 !important;
+}
+
+/* ---------- 方案三 / 四：提高屏效（参考 daydream.ing）——左右只留固定边距，去掉副标题和「Start here」，首屏间距收紧 ---------- */
+/* 原页面内容区最宽 1152px（两侧各留一大块空白）：改成两侧固定 32px，超宽屏到 1600px 后再居中 */
+[data-local-variant='v5']:not([data-device='mobile']) [class*='_scroller_gxdyx_'] {
+  padding-inline: max(32px, calc((100% - 1600px) / 2 + 32px)) !important;
+}
+[data-local-variant='v5'] [class*='_feedHeader_'] [class*='_subtitle_'],
+[data-local-variant='v5'] .lv-keep-title {
+  display: none !important;
+}
+[data-local-variant='v5'] [class*='_feedHeader_'] {
+  padding-top: calc(var(--lv-hero-h, 820px) * 0.07) !important;
+}
+[data-local-variant='v5'] .lv-title {
+  margin-bottom: 0;
+}
+[data-local-variant='v5'] .lv-keep {
+  margin-top: -4px;
+}
+[data-local-variant='v5'] .lv-cats > .lv-tracker:first-of-type {
+  margin-top: -8px;
+}
+
+/* 方案四：右侧会话窗开着时，页面底部的输入框整个让位（滚回顶部也不展开），输入相关交互都由会话窗承接 */
+[data-lv-drawer][data-lv-drawer-open] [class*='_dockLayer_'] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s !important;
+}
+
+/* 方案四：PDP 打开时藏起右下角「Ask migoo」胶囊（PDP 自己右下角有 Ask Migoo，点它关 PDP、开会话窗并带上商品，见 drawer.js） */
+body:has(aside[class*='_drawer_'][class*='_open_']) .lv-drawer-tab {
+  opacity: 0;
+  transform: scale(0.7);
+  pointer-events: none;
+}

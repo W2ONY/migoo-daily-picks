@@ -10,6 +10,7 @@
     { id: "v3", name: "方案三（旧）", desc: "Phia 式左侧窄栏：Chat / Explore / Favorites", hidden: true },
     { id: "v4", name: "方案四", desc: "方案三 + 信息流上方 Categories 商品分类", hidden: true },
     { id: "v5", name: "方案三", desc: "左侧窄栏 + Explore 首屏、底部输入框（滚动收起）、小优惠券" },
+    { id: "v6", name: "方案四", desc: "方案三 + 右侧会话窗：任何页面都能拉开，可展开全屏，没有单独的会话页" },
   ];
   // hidden：不出现在切换菜单里，存过的也回落到默认方案（代码保留，方案五仍复用方案三、四的改动）
   var KEY = "local:variant";
@@ -28,8 +29,12 @@
   }
   // 方案二、三共用 Explore 页改动（输入框在副标题下 / 吸顶胶囊 / 降价 placeholder / 个人中心浮层），
   // 用 <html data-lv-hero> 标记，样式里写 [data-lv-hero]
+  // 方案四（v6）= 方案三（v5）+ 右侧会话窗：页面改版全按方案三走，只多一个 data-lv-drawer
+  function base() {
+    return current() === "v6" ? "v5" : current();
+  }
   function isV4Like() {
-    return current() === "v4" || current() === "v5";
+    return base() === "v4" || base() === "v5";
   }
   function isHero() {
     return current() !== "v1";
@@ -38,12 +43,15 @@
     if (on) root.setAttribute(name, "");
     else root.removeAttribute(name);
   }
-  function markVariant(v) {
+  function markVariant(id) {
+    var v = id === "v6" ? "v5" : id;
     root.setAttribute("data-local-variant", v);
+    toggleAttr("data-lv-drawer", id === "v6");
     // data-lv-hero：方案二~四共用 Explore 改动；data-lv-rail：方案三、四的左侧窄栏；data-lv-cats：方案四分类
     toggleAttr("data-lv-hero", v !== "v1");
     // data-lv-v4：方案四、五共用的 Explore 首屏 / 分区 / PDP 浮层等改动
-    toggleAttr("data-lv-rail", v === "v3" || v === "v4" || v === "v5");
+    // 会话窗里的嵌入页不要窄栏
+    toggleAttr("data-lv-rail", !root.hasAttribute("data-lv-embed") && (v === "v3" || v === "v4" || v === "v5"));
     toggleAttr("data-lv-cats", v === "v4" || v === "v5");
     toggleAttr("data-lv-v4", v === "v4" || v === "v5");
     window.dispatchEvent(new Event("local:variant"));
@@ -84,6 +92,26 @@
     window.dispatchEvent(new Event("local:layout"));
   }
   markLayout(v4Layout());
+
+  // 方案四输入框分支（localStorage local:v6-dock）：auto = 自动（顶部展开、离开顶部收成胶囊）；
+  // collapsed = 收起（默认；任何位置都只露右下角「Ask migoo」胶囊，输入都在右侧会话窗里进行）
+  var V6_DOCKS = [
+    { id: "auto", name: "自动" },
+    { id: "collapsed", name: "收起" },
+  ];
+  function v6Dock() {
+    var v = null;
+    try {
+      v = localStorage.getItem("local:v6-dock");
+    } catch (e) {}
+    return v === "auto" ? v : "collapsed";
+  }
+  function setV6Dock(id) {
+    try {
+      localStorage.setItem("local:v6-dock", id);
+    } catch (e) {}
+    schedulePlace();
+  }
 
   function apply(v) {
     markVariant(v);
@@ -135,24 +163,9 @@
         menu.classList.remove("is-open");
       };
       menu.appendChild(item);
-      // 方案四的样式分支：卡片横滑 / 多行 + See more 分页
-      if ((x.id === "v4" || x.id === "v5") && v === x.id) {
-        var seg = el("div", "lv-menu-seg");
-        seg.appendChild(el("span", "lv-menu-seg-label", "方案三样式"));
-        var group = el("div", "lv-menu-seg-group");
-        V4_LAYOUTS.forEach(function (l) {
-          var b = el("button", "lv-menu-seg-btn" + (v4Layout() === l.id ? " is-active" : ""), l.name);
-          b.type = "button";
-          b.onclick = function (e) {
-            e.stopPropagation();
-            setV4Layout(l.id);
-            renderMenu();
-          };
-          group.appendChild(b);
-        });
-        seg.appendChild(group);
-        menu.appendChild(seg);
-      }
+      // 各方案自己的分支挂在该方案下面（不选中也显示）：方案三 = 样式（方案四沿用同一套）；方案四 = 输入框自动 / 收起
+      if (x.id === "v5") menu.appendChild(segment("样式", V4_LAYOUTS, v4Layout(), setV4Layout, v === "v6" ? null : "v5"));
+      if (x.id === "v6") menu.appendChild(segment("输入框", V6_DOCKS, v6Dock(), setV6Dock, "v6"));
     });
     if (ball)
       ball.querySelector(".lv-ball-label").textContent = VARIANTS.filter(
@@ -160,6 +173,25 @@
           return x.id === v;
         },
       )[0].name.replace("方案", "");
+  }
+  // 分支切换条：选分支时顺带切到该方案（target 为空则留在当前方案，如方案四里改方案三样式）
+  function segment(label, items, active, set, target) {
+    var seg = el("div", "lv-menu-seg");
+    seg.appendChild(el("span", "lv-menu-seg-label", label));
+    var group = el("div", "lv-menu-seg-group");
+    items.forEach(function (it) {
+      var b = el("button", "lv-menu-seg-btn" + (active === it.id ? " is-active" : ""), it.name);
+      b.type = "button";
+      b.onclick = function (e) {
+        e.stopPropagation();
+        set(it.id);
+        if (target && current() !== target) apply(target);
+        else renderMenu();
+      };
+      group.appendChild(b);
+    });
+    seg.appendChild(group);
+    return seg;
   }
   var BALL_KEY = "local:ball-pos";
   var BALL_SIZE = 52;
@@ -384,6 +416,18 @@
       }
       setPhStopped(false);
       var top = currentScrollTop();
+      // 方案四：只按滚动位置决定——回到顶部展开成中间的输入框，离开顶部缩成右下角胶囊；
+      // 胶囊状态下不会因为挂了引用、获得焦点而展开（唤醒走右侧会话窗，见 drawer.js）
+      if (current() === "v6") {
+        if (v6Dock() === "collapsed") layer.dataset.lvCompact = "1";
+        else if (top <= minTop) delete layer.dataset.lvCompact;
+        // 方案四：离开顶部就收成胶囊（输入框聚焦但没内容也收；有字或有引用时保持展开）
+        else if (!layer.dataset.lvCompact && isDockIdle(panel, true)) {
+          layer.dataset.lvCompact = "1";
+          if (panel.contains(document.activeElement)) document.activeElement.blur();
+        }
+        return;
+      }
       // 刚点「Ask migoo」展开的：滚动不超过 80px 前保持展开
       if (pillOpenedAt != null && Math.abs(top - pillOpenedAt) > 80) pillOpenedAt = null;
       var keepOpen = pillOpenedAt != null && panel.contains(document.activeElement);
@@ -391,9 +435,9 @@
       if (top > minTop && isDockIdle(panel) && !keepOpen) layer.dataset.lvCompact = "1";
       else delete layer.dataset.lvCompact;
     }
-    if (current() === "v5" && heading) return bottomDock(8);
+    if (base() === "v5" && heading) return bottomDock(8);
     delete layer.dataset.lvBottom;
-    if (!isHero() || !heading || current() === "v5") {
+    if (!isHero() || !heading || base() === "v5") {
       delete layer.dataset.lvDock;
       delete layer.dataset.lvCompact;
       return;
@@ -520,7 +564,7 @@
       sc = sc.parentElement;
     return sc && sc !== document.body ? sc.scrollTop : 0;
   }
-  function isDockIdle(panel) {
+  function isDockIdle(panel, ignoreFocus) {
     var editor = panel.querySelector(".ProseMirror");
     var header = panel.querySelector(".composer-shell__header");
     var empty =
@@ -529,8 +573,21 @@
     var popoverOpen = document.querySelector(
       ".ant-popover:not(.ant-popover-hidden), .ant-dropdown:not(.ant-dropdown-hidden)",
     );
+    if (ignoreFocus) return empty && !headerFilled && !popoverOpen;
     return empty && !headerFilled && !panel.contains(document.activeElement) && !popoverOpen;
   }
+  // 展开收起的底部输入框并聚焦（方案四右下角的 Ask migoo 胶囊也调这个）
+  window.lvExpandDock = function () {
+    var layer = document.querySelector('[class*="_dockLayer_"]');
+    if (!layer || !layer.hasAttribute("data-lv-compact")) return false;
+    delete layer.dataset.lvCompact;
+    pillOpenedAt = currentScrollTop();
+    setTimeout(function () {
+      var editor = layer.querySelector(".ProseMirror");
+      if (editor) editor.focus();
+    }, 60);
+    return true;
+  };
   // 底部胶囊（方案三，方案二滚动后）：点原页面的「Ask migoo」胶囊 → 聚焦输入框（聚焦后不再空闲，自动展开）
   document.addEventListener(
     "click",
@@ -764,7 +821,7 @@
     var cur = onExplore && window.lvHeroInView === false && window.lvCurrentSection ? window.lvCurrentSection() : null;
     exploreFly.innerHTML = '<div class="lv-recent-title">Explore</div>';
     EXPLORE_SECTIONS.forEach(function (s) {
-      if (s.key === "shopping" && current() === "v5") return;
+      if (s.key === "shopping" && base() === "v5") return;
       var row = el("button", "lv-recent-item" + (s.key === cur ? " is-current" : ""));
       row.type = "button";
       row.appendChild(el("span")).textContent = s.label;

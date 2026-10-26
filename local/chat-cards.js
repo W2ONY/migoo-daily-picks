@@ -216,7 +216,7 @@
 
   // 在当前页（Chat）直接拉起右侧 PDP 抽屉：原页面的 openPdp 由 Daily Picks 模块暴露（assets 里的 local-patch），
   // 直接进 Chat 时该模块还没加载，就按需 import 一次
-  var DAILY_PICKS_MODULE = (window.LV_BASE || "") + "/migoo-daily-picks/assets/js/index-B8tGR6gk.js";
+  var DAILY_PICKS_MODULE = (window.LV_BASE || "") + "/assets/js/index-B8tGR6gk.js";
   function openDetails(it) {
     var info = it.info;
     var args = {

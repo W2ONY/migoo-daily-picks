@@ -4,14 +4,22 @@
   translate="no"
 >
   <head>
+    <!-- 方案四的右侧会话窗里用 iframe 装会话页：嵌入模式下藏起窄栏等外壳、不做入口跳转（local/drawer.js） -->
+    <script>
+      if (window.self !== window.top) {
+        document.documentElement.setAttribute('data-lv-embed', '')
+        try { sessionStorage.setItem('__internal_tools_dismissed__', '1') } catch (e) {}
+      }
+    </script>
     <!-- 第一次打开（浏览器里没选过方案）默认进方案五；悬浮球仍可切换 -->
-    <script>window.LV_DEFAULT_VARIANT = window.LV_DEFAULT_VARIANT || 'v5'</script>
-    <script>window.LV_BASE='/migoo-daily-picks';window.LV_DATA_PARTS=8;window.LV_DEFAULT_VARIANT="v5";</script>
+    <script>window.LV_DEFAULT_VARIANT = window.LV_DEFAULT_VARIANT || 'v6'</script>
+    <script>window.LV_BASE='/migoo-daily-picks';window.LV_DATA_PARTS=8;window.LV_DEFAULT_VARIANT="v6";</script>
     <!-- 本地镜像：接口回放层，必须先于应用脚本执行 -->
     <script src="/migoo-daily-picks/mock/mock-api.js"></script>
     <!-- 本地改版：打开页面一律先进电商页 Daily Picks（根路径、会话页 /home、/chat 的链接或刷新都落到 Explore） -->
     <script>
       (function () {
+        if (document.documentElement.hasAttribute('data-lv-embed')) return
         var p = window.lvPath().replace(/\/+$/, '') || '/'
         if (p === '/' || /^\/(home|chat)(\/|$)/.test(p)) history.replaceState(history.state, '', (window.LV_BASE || '') + '/daily-picks')
         // 静态托管刷新子页面时会补成目录形式（/liked/），应用路由不认结尾斜杠会不停重载，这里去掉
@@ -268,6 +276,7 @@
     <script src="/migoo-daily-picks/local/chat-cards.js"></script>
     <script src="/migoo-daily-picks/local/hero.js"></script>
     <script src="/migoo-daily-picks/local/try-this.js"></script>
+    <script src="/migoo-daily-picks/local/drawer.js"></script>
   </head>
 
   <body>

@@ -672,7 +672,13 @@
   };
 
   /* ---------- 合集卡 ---------- */
-  function sendQuery(text) {
+  function sendQuery(text, quote) {
+    // 方案四：会话在右侧会话窗里，直接送过去（不经过输入坞、不跳页）
+    if (window.lvDrawerActive && window.lvDrawerActive()) return window.lvDrawerSend(text, quote);
+    if (quote && window.__lvAddQuote) {
+      if (window.__lvClearQuotes) window.__lvClearQuotes();
+      window.__lvAddQuote(quote);
+    }
     var layer = document.querySelector('[class*="_dockLayer_"]');
     var editor = layer && layer.querySelector(".ProseMirror");
     // 会话页（如在回复里的券卡上点 Claim now）没有 Daily Picks 输入坞，用会话输入框
@@ -780,7 +786,7 @@
   function openPdpFor(p) {
     markViewed(p.id);
     // 直接进会话页时 Daily Picks 模块（暴露 openPdp 的 local-patch）还没加载，按需 import 一次
-    var ready = window.__lvOpenPdp ? Promise.resolve() : import((window.LV_BASE || "") + "/migoo-daily-picks/assets/js/index-B8tGR6gk.js");
+    var ready = window.__lvOpenPdp ? Promise.resolve() : import((window.LV_BASE || "") + "/assets/js/index-B8tGR6gk.js");
     ready.then(function () {
       if (window.__lvOpenPdp) window.__lvOpenPdp({ offerId: p.info.offer_id, cspuId: p.id, region: p.info.region || "US", productId: p.id });
     });
@@ -1045,17 +1051,12 @@
     return storeName(cp.store) + " · " + cp.big + " off coupon";
   }
   function claimCoupon(cp) {
-    if (!window.__lvAddQuote) return;
-    if (window.__lvClearQuotes) window.__lvClearQuotes();
-    window.__lvAddQuote({
+    sendQuery(CLAIM_TEXT, {
       quoteSource: "big_savings_coupon",
       display: { title: couponTitle(cp), imageUrl: storeLogo(cp.store) },
       pdp: { locator: { source: cp.store, region: "US", offerId: "coupon-" + cp.code } },
       status: "active",
     });
-    setTimeout(function () {
-      sendQuery(CLAIM_TEXT);
-    }, 80);
   }
   // 从发出的消息里认出是哪张券（附件 locator.offer_id = coupon-{券码}）
   function couponFromFrame(frame) {

@@ -1815,25 +1815,26 @@
     var p = state.product;
     var photo = state.photo;
     close();
-    if (window.__lvClearQuotes) window.__lvClearQuotes();
-    if (p && window.__lvAddQuote)
-      window.__lvAddQuote({
-        quoteSource: "try_this_" + kind.ui.theme,
-        display: {
-          title: photo ? "Product photo" : shortTitle(p.info.title),
-          imageUrl: photo || p.info.image,
-        },
-        pdp: {
-          locator: {
-            source: p.store,
-            region: "US",
-            offerId: "cmp-" + (photo ? "photo-" : "") + p.id,
+    var quote = p
+      ? {
+          quoteSource: "try_this_" + kind.ui.theme,
+          display: {
+            title: photo ? "Product photo" : shortTitle(p.info.title),
+            imageUrl: photo || p.info.image,
           },
-        },
-        status: "active",
-      });
+          pdp: {
+            locator: {
+              source: p.store,
+              region: "US",
+              offerId: "cmp-" + (photo ? "photo-" : "") + p.id,
+            },
+          },
+          status: "active",
+        }
+      : null;
+    // sendQuery 负责挂附件：方案四送进右侧会话窗，其他方案挂到输入坞再发
     setTimeout(function () {
-      S().sendQuery(text);
+      S().sendQuery(text, quote);
     }, 80);
   }
 })();
