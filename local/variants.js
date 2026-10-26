@@ -369,22 +369,30 @@
       '[class*="_feedHeader_"] [class*="_headingGroup_"]',
     );
     if (!layer || !panel) return;
-    // 方案五：输入框贴底；页面一离开顶部（> 8px）且输入框空闲就收成单行胶囊，回到顶部或点开再展开
-    if (current() === "v5" && heading) {
+    // 底部输入框（方案三；方案二滚过标题后也用）：页面一离开顶部（> 8px）且输入框空闲就收成「Ask migoo」胶囊，
+    // 回到顶部或点开再展开（收起 / 展开的交叉淡入见 overrides.css 的 [data-lv-bottom]）
+    function bottomDock(minTop) {
+      var fromHero = !!layer.dataset.lvDock;
       delete layer.dataset.lvDock;
+      layer.dataset.lvBottom = "1";
+      // 从标题下的位置切过来：输入框瞬间藏起（不在底部闪一下再淡出），只让胶囊淡入
+      if (fromHero) {
+        layer.dataset.lvSnap = "1";
+        setTimeout(function () {
+          delete layer.dataset.lvSnap;
+        }, 80);
+      }
       setPhStopped(false);
-      var sc = heading.parentElement;
-      while (sc && sc !== document.body && !(/(auto|scroll)/.test(getComputedStyle(sc).overflowY) && sc.scrollHeight > sc.clientHeight + 10))
-        sc = sc.parentElement;
-      var top = sc && sc !== document.body ? sc.scrollTop : 0;
+      var top = currentScrollTop();
       // 刚点「Ask migoo」展开的：滚动不超过 80px 前保持展开
       if (pillOpenedAt != null && Math.abs(top - pillOpenedAt) > 80) pillOpenedAt = null;
       var keepOpen = pillOpenedAt != null && panel.contains(document.activeElement);
       if (pillOpenedAt != null && !panel.contains(document.activeElement) && Math.abs(top - pillOpenedAt) <= 80) keepOpen = true;
-      if (top > 8 && isDockIdle(panel) && !keepOpen) layer.dataset.lvCompact = "1";
+      if (top > minTop && isDockIdle(panel) && !keepOpen) layer.dataset.lvCompact = "1";
       else delete layer.dataset.lvCompact;
-      return;
     }
+    if (current() === "v5" && heading) return bottomDock(8);
+    delete layer.dataset.lvBottom;
     if (!isHero() || !heading || current() === "v5") {
       delete layer.dataset.lvDock;
       delete layer.dataset.lvCompact;
@@ -397,6 +405,8 @@
       area.getBoundingClientRect().top +
       GAP;
     var sticky = target < STICKY_TOP;
+    // 方案二：输入框随标题滚出顶部后，不再吸顶，改成和方案三一样收到底部的「Ask migoo」胶囊
+    if (sticky && current() === "v2") return bottomDock(0);
     // 输入框上方可能出现建议问句行（在 panel 之上），吸顶时整层不出视口，让输入框顺势下移
     var top = target - panel.offsetTop;
     if (sticky) {
@@ -521,12 +531,11 @@
     );
     return empty && !headerFilled && !panel.contains(document.activeElement) && !popoverOpen;
   }
-  // 方案五：点原页面的「Ask migoo」胶囊 → 聚焦输入框（聚焦后不再空闲，自动展开）
+  // 底部胶囊（方案三，方案二滚动后）：点原页面的「Ask migoo」胶囊 → 聚焦输入框（聚焦后不再空闲，自动展开）
   document.addEventListener(
     "click",
     function (e) {
-      if (current() !== "v5") return;
-      var pill = e.target.closest && e.target.closest('[data-lv-compact] [class*="_pill_"]');
+      var pill = e.target.closest && e.target.closest('[data-lv-bottom][data-lv-compact] [class*="_pill_"]');
       if (!pill) return;
       // 先展开（隐藏状态下的编辑器聚焦不了），等输入框显示出来再聚焦
       var layer = pill.closest('[class*="_dockLayer_"]');

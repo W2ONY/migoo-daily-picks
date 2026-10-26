@@ -2511,34 +2511,34 @@
   transform: none;
 }
 
-/* 方案五底部输入框：滚动一离开顶部就收成原页面的「Ask migoo」胶囊（样式不变），
+/* 底部输入框（方案三；方案二滚过标题后也用）：滚动一离开顶部就收成原页面的「Ask migoo」胶囊（样式不变），
    收起 / 展开时机由 variants.js 的 data-lv-compact 决定（不再等原页面滚过头部），
    切换改为交叉淡入：输入框下沉缩小淡出、胶囊上浮淡入（原页面是瞬间互换，太跳） */
-[data-local-variant='v5'] [class*='_dockLayer_'] [class*='_dockPanel_'] {
+[class*='_dockLayer_'][data-lv-bottom] [class*='_dockPanel_'] {
   transition:
     opacity 0.3s ease,
     transform 0.4s cubic-bezier(0.22, 0.8, 0.24, 1),
     visibility 0s linear 0s !important;
 }
-[data-local-variant='v5'] [class*='_dockLayer_'] [class*='_pill_'] {
+[class*='_dockLayer_'][data-lv-bottom] [class*='_pill_'] {
   transition:
     opacity 0.28s ease,
     transform 0.4s cubic-bezier(0.22, 0.8, 0.24, 1),
     visibility 0s linear 0.4s !important;
 }
-[data-local-variant='v5'] [class*='_dockLayer_']:not([data-lv-compact]) [class*='_dockPanel_'] {
+[class*='_dockLayer_'][data-lv-bottom]:not([data-lv-compact]) [class*='_dockPanel_'] {
   visibility: visible !important;
   opacity: 1 !important;
   transform: none !important;
   pointer-events: auto !important;
 }
-[data-local-variant='v5'] [class*='_dockLayer_']:not([data-lv-compact]) [class*='_pill_'] {
+[class*='_dockLayer_'][data-lv-bottom]:not([data-lv-compact]) [class*='_pill_'] {
   visibility: hidden !important;
   opacity: 0 !important;
   transform: translate(-50%, 10px) scale(0.92) !important;
   pointer-events: none !important;
 }
-[data-local-variant='v5'] [class*='_dockLayer_'][data-lv-compact] [class*='_dockPanel_'] {
+[class*='_dockLayer_'][data-lv-bottom][data-lv-compact] [class*='_dockPanel_'] {
   visibility: hidden !important;
   opacity: 0 !important;
   transform: translateY(14px) scale(0.97) !important;
@@ -2548,7 +2548,7 @@
     transform 0.4s cubic-bezier(0.22, 0.8, 0.24, 1),
     visibility 0s linear 0.4s !important;
 }
-[data-local-variant='v5'] [class*='_dockLayer_'][data-lv-compact] [class*='_pill_'] {
+[class*='_dockLayer_'][data-lv-bottom][data-lv-compact] [class*='_pill_'] {
   visibility: visible !important;
   opacity: 1 !important;
   transform: translateX(-50%) !important;
@@ -2558,8 +2558,13 @@
     transform 0.4s cubic-bezier(0.22, 0.8, 0.24, 1) 0.04s,
     visibility 0s linear 0s !important;
 }
-[data-local-variant='v5'] [class*='_dockLayer_'][data-lv-compact] [class*='_dockOverlay_'] {
+[class*='_dockLayer_'][data-lv-bottom][data-lv-compact] [class*='_dockOverlay_'] {
   opacity: 0 !important;
+}
+
+/* 方案二从标题下切到底部那一下：输入框直接藏起，不做淡出 */
+[class*='_dockLayer_'][data-lv-bottom][data-lv-snap] [class*='_dockPanel_'] {
+  transition: none !important;
 }
 
 /* Big Savings：Claim now 按钮（替代原 COPY），券码打码后字间距略放宽 */
@@ -4161,4 +4166,119 @@
 /* 新发出的消息在历史滚出视图前先藏着，滚完再浮起渐入（chat-cards.js introTurn） */
 .chat-blocks-group.lv-sent-hold {
   opacity: 0;
+}
+
+/* Start here 弹窗按步骤展开：补充输入框、Track 的目标价先不出现，选好主输入后渐显；选了商品就收起「看过的商品」 */
+.lv-cmp-extra,
+.lv-trk-target-row {
+  display: none;
+}
+.lv-cmp-extra.is-shown,
+.lv-trk-target-row.is-shown {
+  display: flex;
+  animation: lv-step-show 0.32s ease both;
+}
+.lv-trk-target-row.is-shown {
+  display: block;
+}
+.lv-cmp-suggest.is-gone {
+  display: none;
+}
+@keyframes lv-step-show {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Auto-task 页：Track Price Drops 设好的提醒（try-this.js mountAlerts），有提醒时藏起原页面的空态 */
+[data-lv-alerts] > [class*='_fullShell_'] {
+  display: none !important;
+}
+.lv-alerts {
+  max-width: 880px;
+  margin: 8px auto 24px;
+  padding: 0 24px;
+  font-family: Inter, -apple-system, sans-serif;
+}
+.lv-alerts-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2329;
+}
+.lv-alert {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px 12px 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(142, 142, 147, 0.2);
+  border-radius: 14px;
+  background: #fff;
+}
+.lv-alert > img {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: contain;
+  background: #f7f8fa;
+}
+.lv-alert-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lv-alert-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.lv-alert-tag {
+  flex: none;
+  padding: 1px 8px;
+  border: 1px solid #b8ccfb;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #2f6bff;
+}
+.lv-alert-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2329;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-alert-sub {
+  font-size: 13px;
+  color: #4e5969;
+}
+.lv-alert-meta {
+  font-size: 12px;
+  color: #8a8f98;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lv-alert-stop {
+  flex: none;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid #e3e5e8;
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  color: #4e5969;
+  cursor: pointer;
+}
+.lv-alert-stop:hover {
+  border-color: #c9cdd4;
+  color: #1f2329;
 }

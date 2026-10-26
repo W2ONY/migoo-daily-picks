@@ -811,9 +811,18 @@
     } catch (e) {}
   }
   // 每张卡都有关系标签：前 4 张固定 Tracking（蓝色实底，最显眼）；其余按真实收藏 / 浏览，没有就按 id 播种三选一
+  // 用户在 Track Price Drops 里设了提醒的商品（try-this.js 的 lvTracked）
+  function trackedAlert(p) {
+    if (!window.lvTracked) return null;
+    return (
+      window.lvTracked.list().filter(function (t) {
+        return t.pid === p.id;
+      })[0] || null
+    );
+  }
   function relationOf(p, i) {
     var tracking = { kind: "tracking", label: "Tracking" };
-    if (i < 4) return tracking;
+    if (i < 4 || trackedAlert(p)) return tracking;
     if (likedIds().indexOf(p.buybox) >= 0) return { kind: "liked", label: "Liked" };
     if (viewedIds().indexOf(p.id) >= 0) return { kind: "viewed", label: "Viewed" };
     return [tracking, { kind: "liked", label: "Liked" }, { kind: "viewed", label: "Viewed" }][seeded(p.id + "rel", 3)];
@@ -839,11 +848,17 @@
     tag.appendChild(el("span", null, rel.label));
     body.appendChild(tag);
     body.appendChild(el("span", "lv-steal-title", shortTitle(p.info.title)));
-    body.appendChild(el("span", "lv-steal-sub", storeName(p.store) + " · save " + fmt(p.max - p.price)));
+    // 自己设了提醒的商品可能没有降价记录：卖点行写提醒价，价格行不放划线价和降幅
+    var alert = trackedAlert(p);
+    body.appendChild(
+      el("span", "lv-steal-sub", storeName(p.store) + (p.drop ? " · save " + fmt(p.max - p.price) : alert ? " · alert below $" + alert.target : "")),
+    );
     var prices = el("span", "lv-steal-prices");
     prices.appendChild(el("b", null, fmt(p.price)));
-    prices.appendChild(el("s", null, fmt(p.max)));
-    prices.appendChild(el("span", "lv-steal-pill", "−" + p.drop + "%"));
+    if (p.drop) {
+      prices.appendChild(el("s", null, fmt(p.max)));
+      prices.appendChild(el("span", "lv-steal-pill", "−" + p.drop + "%"));
+    }
     body.appendChild(prices);
     var chart = el("span", "lv-steal-chart");
     chart.insertAdjacentHTML("beforeend", sparkline(p.chart));
@@ -860,11 +875,23 @@
   }
 
   function buildTracker() {
-    var list = products()
-      .filter(function (p) {
-        return p.drop && p.chart.length;
-      })
-      .sort(byDrop)
+    // 用户新设的提醒排最前，后面接降幅最大的商品（去重），一共 TRACKER_SIZE 张
+    var mine = window.lvTracked
+      ? window.lvTracked.products().map(function (t) {
+          return t.product;
+        })
+      : [];
+    var mineIds = mine.map(function (p) {
+      return p.id;
+    });
+    var list = mine
+      .concat(
+        products()
+          .filter(function (p) {
+            return p.drop && p.chart.length && mineIds.indexOf(p.id) < 0;
+          })
+          .sort(byDrop),
+      )
       .slice(0, TRACKER_SIZE);
     if (list.length < 3) return null;
     var box = el("div", "lv-tracker");
@@ -1286,6 +1313,14 @@
   // 给 compare.js 用的商品池与工具函数
   window.lvShop = { products: products, storeName: storeName, storeLogo: storeLogo, sendQuery: sendQuery, fmt: fmt, money: money, seeded: seeded, byDrop: byDrop };
 
+  // Track Price Drops 设了 / 停了提醒：重建分区，Price Drops 列表跟着更新
+  window.addEventListener("lv:tracked", function () {
+    if (!section) return;
+    if (section.parentNode) section.remove();
+    section = null;
+    grids = [];
+    schedule();
+  });
   function mount() {
     var header = document.querySelector('[class*="_feedHeader_"]');
     if (!on() || !header) {

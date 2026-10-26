@@ -1397,7 +1397,7 @@
         markPreset();
       };
       markPreset();
-      extraSection(body, "Anything to consider? e.g. only the black one (optional)");
+      // Track 只要商品 + 目标价，不给补充说明输入框
     },
     ready: function () {
       return !!state.product && state.target > 0;
@@ -1574,9 +1574,18 @@
   };
 
   /* ---------- 弹窗外壳 ---------- */
+  // 弹窗按步骤展开：先只问主输入（商品 / 想买什么 / 送给谁）；选好后收起「看过的商品」，
+  // Track 再渐显目标价，补充说明输入框最后渐显（ready 之后）
   function refreshGo() {
     if (!modal) return;
-    modal.querySelector(".lv-cmp-go").disabled = !state.kind.ui.ready();
+    var ready = state.kind.ui.ready();
+    modal.querySelector(".lv-cmp-go").disabled = !ready;
+    var extra = modal.querySelector(".lv-cmp-extra");
+    if (extra) extra.classList.toggle("is-shown", ready);
+    var sug = modal.querySelector(".lv-cmp-suggest");
+    if (sug) sug.classList.toggle("is-gone", !!state.product);
+    var target = modal.querySelector(".lv-trk-target-row");
+    if (target) target.classList.toggle("is-shown", !!state.product);
   }
   function build(kind) {
     var ui = kind.ui;
@@ -1644,10 +1653,164 @@
     }, 220);
   }
 
+  /* ---------- Track Price Drops：设好就生效，不进对话 ----------
+   * 提醒存在 localStorage（lv:tracked），Price Drops 列表（categories.js）和 Auto-task 页（下面 mountAlerts）都读它 */
+  var TRACKED_KEY = "lv:tracked";
+  function trackedList() {
+    try {
+      return JSON.parse(localStorage.getItem(TRACKED_KEY) || "[]");
+    } catch (e) {
+      return [];
+    }
+  }
+  function saveTracked(list) {
+    try {
+      localStorage.setItem(TRACKED_KEY, JSON.stringify(list));
+    } catch (e) {}
+    window.dispatchEvent(new Event("lv:tracked"));
+  }
+  window.lvTracked = {
+    list: trackedList,
+    // 提醒对应的商品（找不到的忽略）
+    products: function () {
+      return trackedList()
+        .map(function (t) {
+          var p = productById(t.pid);
+          return p ? Object.assign({}, t, { product: p }) : null;
+        })
+        .filter(Boolean);
+    },
+    has: function (pid) {
+      return trackedList().some(function (t) {
+        return t.pid === pid;
+      });
+    },
+    remove: function (pid) {
+      saveTracked(
+        trackedList().filter(function (t) {
+          return t.pid !== pid;
+        }),
+      );
+    },
+  };
+  function toast(text) {
+    var t = el("div", "lv-toast", text);
+    document.body.appendChild(t);
+    requestAnimationFrame(function () {
+      t.classList.add("is-in");
+    });
+    setTimeout(function () {
+      t.classList.remove("is-in");
+      setTimeout(function () {
+        t.remove();
+      }, 250);
+    }, 2400);
+  }
+  function startTracking() {
+    var p = state.product;
+    var item = {
+      pid: p.id,
+      target: state.target,
+      scope: state.opts.scope,
+      freq: state.opts.freq,
+      notify: state.opts.notify,
+      note: (state.note || "").trim(),
+      at: Date.now(),
+    };
+    saveTracked(
+      [item].concat(
+        trackedList().filter(function (t) {
+          return t.pid !== p.id;
+        }),
+      ),
+    );
+    close();
+    toast("Price alert set — we'll let you know when " + shortTitle(p.info.title) + " drops below $" + state.target);
+  }
+
+  // Auto-task 页：在原页面的列表区插入「Price alerts」（原页面没有录到任务接口，空态时会显示 No auto-task yet）
+  var alertsBox = null;
+  function alertRow(t) {
+    var sh = S();
+    var p = t.product;
+    var row = el("div", "lv-alert");
+    var img = el("img");
+    img.alt = "";
+    img.src = p.info.image;
+    row.appendChild(img);
+    var mid = el("div", "lv-alert-main");
+    var head = el("div", "lv-alert-head");
+    head.appendChild(el("span", "lv-alert-tag", "Tracking"));
+    head.appendChild(el("span", "lv-alert-title", shortTitle(p.info.title)));
+    mid.appendChild(head);
+    mid.appendChild(
+      el(
+        "div",
+        "lv-alert-sub",
+        "Alert below $" + t.target + " · now " + sh.fmt(p.price) + " at " + sh.storeName(p.store),
+      ),
+    );
+    mid.appendChild(
+      el(
+        "div",
+        "lv-alert-meta",
+        (t.freq === "hourly" ? "Checks hourly" : "Checks daily") +
+          " · " +
+          (t.scope === "store" ? sh.storeName(p.store) + " only" : "All stores") +
+          " · " +
+          (t.notify === "email" ? "Migoo + email" : "Notify in Migoo") +
+          (t.note ? " · " + t.note : ""),
+      ),
+    );
+    row.appendChild(mid);
+    var stop = el("button", "lv-alert-stop", "Stop");
+    stop.type = "button";
+    stop.onclick = function () {
+      window.lvTracked.remove(t.pid);
+      toast("Stopped tracking " + shortTitle(p.info.title));
+    };
+    row.appendChild(stop);
+    return row;
+  }
+  function mountAlerts() {
+    var panel = document.querySelector('main [class*="_panel_"]');
+    var onPage = /^\/auto-task\/?$/.test(window.lvPath()) && panel && S() && S().products().length;
+    var list = onPage ? window.lvTracked.products() : [];
+    if (!onPage || !list.length) {
+      if (alertsBox && alertsBox.parentNode) alertsBox.remove();
+      if (panel) panel.removeAttribute("data-lv-alerts");
+      return;
+    }
+    if (!alertsBox) alertsBox = el("section", "lv-alerts");
+    var sig = JSON.stringify(window.lvTracked.list());
+    if (alertsBox._sig !== sig) {
+      alertsBox._sig = sig;
+      alertsBox.innerHTML = "";
+      alertsBox.appendChild(el("h2", "lv-alerts-title", "Price alerts"));
+      list.forEach(function (t) {
+        alertsBox.appendChild(alertRow(t));
+      });
+    }
+    if (alertsBox.parentNode !== panel) panel.insertBefore(alertsBox, panel.firstChild);
+    panel.setAttribute("data-lv-alerts", "");
+  }
+  var alertsPending = false;
+  function scheduleAlerts() {
+    if (alertsPending) return;
+    alertsPending = true;
+    setTimeout(function () {
+      alertsPending = false;
+      mountAlerts();
+    }, 150);
+  }
+  new MutationObserver(scheduleAlerts).observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener("lv:tracked", scheduleAlerts);
+
   // 提交：要商品的项先把商品作为引用附件放进输入坞，再发 query（Daily Picks 输入坞 Enter 即发送并进会话页）
   function submit() {
     var kind = state.kind;
     if (!kind.ui.ready()) return;
+    if (kind === TRACK) return startTracking();
     var text = kind.query(state);
     var p = state.product;
     var photo = state.photo;
