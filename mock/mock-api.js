@@ -139,7 +139,8 @@
     parts
       ? Promise.all(
           Array.from({ length: parts }, function (_, i) {
-            return origFetch(DATA_URL + "." + i).then(function (r) {
+            // 发布版带版本号（window.LV_V），更新后不吃浏览器里的旧缓存
+            return origFetch(DATA_URL + "." + i + (window.LV_V ? "?v=" + window.LV_V : "")).then(function (r) {
               return r.text();
             });
           }),
