@@ -595,8 +595,7 @@
     var popoverOpen = document.querySelector(
       ".ant-popover:not(.ant-popover-hidden), .ant-dropdown:not(.ant-dropdown-hidden)",
     );
-    // 输入坞里的插件引导卡不算「在用输入框」
-    var focusIn = panel.contains(document.activeElement) && !document.activeElement.closest(".lv-ext-promo");
+    var focusIn = panel.contains(document.activeElement);
     if (ignoreFocus) return empty && !headerFilled && !popoverOpen;
     return empty && !headerFilled && !focusIn && !popoverOpen;
   }
@@ -753,6 +752,60 @@
     ext.title = "Okiee for Chrome · Best price check on any product page";
     ext.innerHTML = CHROME_LOGO + "<span>Add Okiee to Chrome</span>";
     document.body.appendChild(ext);
+    mountExtTip(ext);
+  }
+  /* ---------- 右上角「Add Okiee to Chrome」下方的插件推广气泡 ----------
+   * 进页面稍等一下从按钮下方弹出，小三角对准按钮；Not now / × 关掉后记在 localStorage，不再出现 */
+  var EXT_TIP_KEY = "local:ext-promo-off";
+  function extTipOff() {
+    try {
+      return localStorage.getItem(EXT_TIP_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  }
+  function mountExtTip(ext) {
+    if (extTipOff()) return;
+    var tip = el("div", "lv-ext-tip");
+    tip.setAttribute("role", "dialog");
+    tip.innerHTML =
+      '<span class="lv-ext-tip-logo"><img src="' + (window.LV_BASE || "") + '/local/okiee-logo.png" alt=""></span>' +
+      '<div class="lv-ext-tip-main">' +
+      "<b>Find deals anywhere you browse</b>" +
+      "<p>Add the Okiee extension to compare prices on any product page, automatically.</p>" +
+      '<div class="lv-ext-tip-actions">' +
+      '<a class="lv-ext-tip-add" target="_blank" rel="noopener">Add to Chrome</a>' +
+      '<button type="button" class="lv-ext-tip-later">Not now</button>' +
+      "</div></div>" +
+      '<button type="button" class="lv-ext-tip-close" aria-label="Close">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>' +
+      "</button>";
+    tip.querySelector(".lv-ext-tip-add").href = EXT_URL;
+    function dismiss() {
+      try {
+        localStorage.setItem(EXT_TIP_KEY, "1");
+      } catch (e) {}
+      tip.classList.remove("is-shown");
+      setTimeout(function () {
+        tip.remove();
+      }, 250);
+      window.removeEventListener("resize", aim);
+    }
+    tip.querySelector(".lv-ext-tip-later").onclick = dismiss;
+    tip.querySelector(".lv-ext-tip-close").onclick = dismiss;
+    // 小三角对准按钮中线（按钮宽度随文案变）
+    function aim() {
+      // 用布局盒（offsetLeft）算，弹出动画里的缩放不影响
+      var b = ext.getBoundingClientRect();
+      if (!b.width || !tip.offsetWidth) return;
+      tip.style.setProperty("--lv-tip-caret", Math.round(b.left + b.width / 2 - tip.offsetLeft) + "px");
+    }
+    document.body.appendChild(tip);
+    window.addEventListener("resize", aim);
+    setTimeout(function () {
+      aim();
+      tip.classList.add("is-shown");
+    }, 800);
   }
   var CHATS_KEY = "local:shopping-chats";
   function recentChats() {

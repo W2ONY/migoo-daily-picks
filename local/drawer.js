@@ -389,51 +389,6 @@
     if (mode === "full") setMode("open");
     else close();
   };
-  /* ---------- 单行输入框上方的「装 Chrome 插件」引导卡（参考 dupe.com 结果页底部） ----------
-   * 卡片垫在单行胶囊后面、底边被胶囊压住；只在单行且没展开时出现（显隐见 overrides.css）。
-   * Not now / × 关掉后记在 localStorage，不再出现 */
-  var PROMO_KEY = "local:ext-promo-off";
-  function promoOff() {
-    try {
-      return localStorage.getItem(PROMO_KEY) === "1";
-    } catch (e) {
-      return false;
-    }
-  }
-  function mountPromo(layer) {
-    var panel = layer.querySelector('[class*="_dockPanel_"]');
-    if (!panel || promoOff() || panel.querySelector(":scope > .lv-ext-promo")) return;
-    var card = el("div", "lv-ext-promo");
-    card.innerHTML =
-      '<span class="lv-ext-promo-logo"><img src="' + base() + '/local/okiee-logo.png" alt=""></span>' +
-      '<div class="lv-ext-promo-main">' +
-      "<b>Find deals anywhere you browse</b>" +
-      "<p>Add the Okiee extension to compare prices on any product page, automatically.</p>" +
-      '<div class="lv-ext-promo-actions">' +
-      '<a class="lv-ext-promo-add" target="_blank" rel="noopener">Add to Chrome</a>' +
-      '<button type="button" class="lv-ext-promo-later">Not now</button>' +
-      "</div></div>" +
-      '<button type="button" class="lv-ext-promo-close" aria-label="Close">' +
-      svg(ICON.close) +
-      "</button>";
-    card.querySelector(".lv-ext-promo-add").href = window.lvExtUrl || "https://chromewebstore.google.com/";
-    function dismiss() {
-      try {
-        localStorage.setItem(PROMO_KEY, "1");
-      } catch (e) {}
-      card.classList.add("is-off");
-      setTimeout(function () {
-        card.remove();
-      }, 250);
-    }
-    card.querySelector(".lv-ext-promo-later").onclick = dismiss;
-    card.querySelector(".lv-ext-promo-close").onclick = dismiss;
-    // 卡片在输入坞里：点它的按钮不能拿焦点，否则会被当成「点进了输入框」展开成双行再缩回，一闪
-    card.addEventListener("mousedown", function (e) {
-      e.preventDefault();
-    });
-    panel.insertBefore(card, panel.firstChild);
-  }
   // Explore 底部输入框的小弧线：拉开右侧会话窗，已输入的文字和挂着的引用一起带过去
   function dockToSide() {
     var layer = dockLayer();
@@ -516,7 +471,6 @@
     if (layer) aimDock(layer);
     // 单行（胶囊形）时小弧线由 CSS 藏起，展开成双行后才出现
     if (dockOpen) mountArc(layer.querySelector(".composer-shell__body"), null, dockToSide);
-    if (dockOpen) mountPromo(layer);
   }
   // 输入坞上挂着的引用商品（信息流卡片「Ask」带进来的，显示为附件卡片）→ 会话窗附件；按标题在商品池里找回商品信息
   function dockQuote(layer) {

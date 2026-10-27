@@ -4735,135 +4735,6 @@ body:has(aside[class*='_drawer_'][class*='_open_']) .lv-drawer-tab {
 }
 
 
-/* ---------- 方案四「单行」：输入框上方的「装 Chrome 插件」引导卡（参考 dupe.com）——垫在胶囊后面、底边被胶囊压住 ---------- */
-.lv-ext-promo {
-  display: none;
-}
-[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .lv-ext-promo {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: calc(100% - 22px);
-  z-index: 0;
-  display: flex;
-  gap: 12px;
-  padding: 14px 14px 34px;
-  border: 1px solid rgba(245, 166, 35, 0.22);
-  border-radius: 20px;
-  background: linear-gradient(180deg, #fff9ea 0%, #fff4dc 100%);
-  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
-  font-family: Inter, -apple-system, sans-serif;
-  animation: lv-ext-promo-in 0.3s ease both;
-  transition:
-    opacity 0.2s ease,
-    transform 0.25s ease;
-}
-[data-lv-drawer][data-lv-dock-line] [class*='_dockLayer_']:not([data-lv-line-active]) .composer-shell__body {
-  position: relative;
-  z-index: 1;
-}
-.lv-ext-promo.is-off {
-  opacity: 0;
-  transform: translateY(24px);
-}
-@keyframes lv-ext-promo-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-}
-.lv-ext-promo-logo {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(245, 166, 35, 0.25);
-}
-.lv-ext-promo-logo img {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
-}
-.lv-ext-promo-main {
-  flex: 1;
-  min-width: 0;
-  padding-right: 20px;
-}
-.lv-ext-promo-main b {
-  display: block;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 20px;
-  color: #1f2329;
-}
-.lv-ext-promo-main p {
-  margin: 2px 0 10px;
-  font-size: 13px;
-  line-height: 18px;
-  color: #4e5969;
-}
-.lv-ext-promo-actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.lv-ext-promo-add {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 16px;
-  border-radius: 999px;
-  background: #1f2329;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.15s ease;
-}
-.lv-ext-promo-add:hover {
-  background: #000;
-  color: #fff;
-}
-.lv-ext-promo-later {
-  height: 32px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: #4e5969;
-  font-size: 13px;
-  cursor: pointer;
-}
-.lv-ext-promo-later:hover {
-  background: rgba(31, 35, 41, 0.06);
-}
-.lv-ext-promo-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: #86909c;
-  cursor: pointer;
-}
-.lv-ext-promo-close:hover {
-  background: rgba(31, 35, 41, 0.06);
-  color: #1f2329;
-}
-.lv-ext-promo-close svg {
-  width: 14px;
-  height: 14px;
-}
-
 /* ---------- TRY THIS 卡重做：更醒目的行动卡——左侧图标块、标题 + 一句价值说明、右侧强调色箭头按钮 ----------
  * 每张卡沿用 --tone 系列配色（见上方 .lv-keep-try:nth-child）；底色从强调色淡出到白，角落一团同色光晕；
  * hover：卡片上浮 + 同色投影，图标块轻转，箭头按钮右移 */
@@ -5307,4 +5178,145 @@ aside[class*='_drawer_'][class*='_workspacePanel_']:not([class*='_open_']),
 }
 .lv-menu-seg {
   margin: 2px 10px 10px;
+}
+
+/* ---------- 右上角「Add Okiee to Chrome」下方的插件推广气泡（variants.js 的 mountExtTip）：小三角对准按钮，Not now / × 关掉 ---------- */
+.lv-ext-tip {
+  display: none;
+}
+[data-lv-rail] .lv-ext-tip {
+  position: fixed;
+  top: 66px;
+  right: 24px;
+  z-index: 950;
+  display: flex;
+  gap: 12px;
+  width: 360px;
+  padding: 16px 16px 16px 14px;
+  border: 1px solid rgba(245, 166, 35, 0.25);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fffaee 0%, #fff4dc 100%);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+  font-family: Inter, -apple-system, sans-serif;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transform-origin: var(--lv-tip-caret, 85%) 0;
+  pointer-events: none;
+  transition:
+    opacity 0.22s ease,
+    transform 0.3s cubic-bezier(0.22, 0.8, 0.24, 1);
+}
+[data-lv-rail] .lv-ext-tip.is-shown {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+/* 指向按钮的小三角 */
+.lv-ext-tip::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: calc(var(--lv-tip-caret, 85%) - 7px);
+  width: 12px;
+  height: 12px;
+  border-top: 1px solid rgba(245, 166, 35, 0.25);
+  border-left: 1px solid rgba(245, 166, 35, 0.25);
+  border-radius: 3px 0 0 0;
+  background: #fffaee;
+  transform: rotate(45deg);
+}
+/* PDP 打开时和按钮一起藏起 */
+[data-lv-v4] body:has(aside[class*='_drawer_1jl65_'][class*='_open_']) .lv-ext-tip {
+  display: none !important;
+}
+.lv-ext-tip-logo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(245, 166, 35, 0.25);
+}
+.lv-ext-tip-logo img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+.lv-ext-tip-main {
+  flex: 1;
+  min-width: 0;
+  padding-right: 18px;
+}
+.lv-ext-tip-main b {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  color: #1f2329;
+}
+.lv-ext-tip-main p {
+  margin: 3px 0 12px;
+  font-size: 13px;
+  line-height: 18px;
+  color: #4e5969;
+}
+.lv-ext-tip-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lv-ext-tip-add {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #1f2329;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+.lv-ext-tip-add:hover {
+  background: #000;
+  color: #fff;
+}
+.lv-ext-tip-later {
+  height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #4e5969;
+  font-size: 13px;
+  cursor: pointer;
+}
+.lv-ext-tip-later:hover {
+  background: rgba(31, 35, 41, 0.06);
+}
+.lv-ext-tip-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #86909c;
+  cursor: pointer;
+}
+.lv-ext-tip-close:hover {
+  background: rgba(31, 35, 41, 0.06);
+  color: #1f2329;
+}
+.lv-ext-tip-close svg {
+  width: 14px;
+  height: 14px;
 }
