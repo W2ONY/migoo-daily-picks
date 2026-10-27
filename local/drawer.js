@@ -31,7 +31,13 @@
     shrink: '<path d="M13 19H5v-8M5 19l9-9"/>',
   };
   function arcSvg(cls, path) {
-    return '<svg class="' + cls + '" viewBox="0 0 24 24" aria-hidden="true">' + path + "</svg>";
+    return (
+      '<svg class="' +
+      cls +
+      '" viewBox="0 0 24 24" aria-hidden="true">' +
+      path +
+      "</svg>"
+    );
   }
   // shrink 为空 = 放大箭头（Visit agent）；否则常驻缩小箭头，shrink 是它的提示文字
   function mountArc(body, shrink, onClick) {
@@ -41,7 +47,8 @@
       btn = document.createElement("button");
       btn.type = "button";
       btn.className = "lv-agent-arc";
-      btn.innerHTML = arcSvg("lv-arc-line", ARC_PATH.line) + arcSvg("lv-arc-icon", "");
+      btn.innerHTML =
+        arcSvg("lv-arc-line", ARC_PATH.line) + arcSvg("lv-arc-icon", "");
       // 不抢输入框焦点，也不让输入框自己的点击逻辑接到
       btn.addEventListener("mousedown", function (e) {
         e.preventDefault();
@@ -57,7 +64,9 @@
     if (btn._shrink === shrink) return;
     btn._shrink = shrink;
     btn.classList.toggle("is-full", !!shrink);
-    btn.querySelector(".lv-arc-icon").innerHTML = shrink ? ARC_PATH.shrink : ARC_PATH.expand;
+    btn.querySelector(".lv-arc-icon").innerHTML = shrink
+      ? ARC_PATH.shrink
+      : ARC_PATH.expand;
     btn.setAttribute("data-tip", shrink || "Visit agent");
     btn.setAttribute("aria-label", shrink || "Visit agent");
   }
@@ -116,16 +125,18 @@
     };
     // 只把附件挂到会话输入框并聚焦（引用商品唤醒会话窗时用，用户自己接着打字）
     window.lvEmbedAttach = function (quote) {
-      return import(base() + "/assets/js/draftSelectors-50w6MmyI.js").then(function (m) {
-        var conv = conversationId();
-        if (!conv) return;
-        m.$(conv);
-        m.ae(conv, quote);
-        setTimeout(function () {
-          var editor = composer();
-          if (editor) editor.focus();
-        }, 120);
-      });
+      return import(base() + "/assets/js/draftSelectors-50w6MmyI.js").then(
+        function (m) {
+          var conv = conversationId();
+          if (!conv) return;
+          m.$(conv);
+          m.ae(conv, quote);
+          setTimeout(function () {
+            var editor = composer();
+            if (editor) editor.focus();
+          }, 120);
+        },
+      );
     };
     window.lvEmbedReady = function () {
       return !!composer();
@@ -142,9 +153,13 @@
     setInterval(function () {
       var p = window.parent;
       var full = !!(p && p.lvDrawerMode && p.lvDrawerMode() === "full");
-      mountArc(document.querySelector(".home-composer-panel .composer-shell__body"), full ? "Exit full screen" : "Collapse", function () {
-        if (p && p.lvDrawerArc) p.lvDrawerArc();
-      });
+      mountArc(
+        document.querySelector(".home-composer-panel .composer-shell__body"),
+        full ? "Exit full screen" : "Collapse",
+        function () {
+          if (p && p.lvDrawerArc) p.lvDrawerArc();
+        },
+      );
     }, 300);
     return;
   }
@@ -180,7 +195,9 @@
     drawer.setAttribute("aria-label", "Okiee chat");
     drawer.innerHTML =
       '<div class="lv-drawer-head"><span class="lv-drawer-title">' +
-      '<img class="lv-brand-logo" src="' + base() + '/local/okiee-logo.png" alt="">' +
+      '<img class="lv-brand-logo" src="' +
+      base() +
+      '/local/okiee-logo.png" alt="">' +
       '<b>Okiee Agent</b></span><span class="lv-drawer-actions">' +
       '<button type="button" class="lv-drawer-btn lv-drawer-size" aria-label="Expand"></button>' +
       '<button type="button" class="lv-drawer-btn lv-drawer-close" aria-label="Close">' +
@@ -196,9 +213,12 @@
     document.body.appendChild(drawer);
     tab = el("button", "lv-drawer-tab");
     tab.type = "button";
-    // 图标沿用原页面胶囊的那个（拿不到时用自己的）
-    var origIcon = document.querySelector('[class*="_dockLayer_"] [class*="_pill_"] svg');
-    tab.innerHTML = (origIcon ? origIcon.outerHTML : svg(ICON.chat)) + "<span>Ask Okiee</span>";
+    // 贴右边缘的品牌按钮：白底圆里放 Okiee logo
+    tab.innerHTML =
+      '<span class="lv-drawer-tab-logo"><img src="' +
+      base() +
+      '/local/okiee-logo.png" alt=""></span>' +
+      "<span>Ask Okiee</span>";
     tab.onclick = function () {
       open();
     };
@@ -278,12 +298,24 @@
       function move(ev) {
         var dx = ev.clientX - x0;
         if (kind === "move") {
-          var right = Math.max(EDGE, Math.min(fromRight - dx, window.innerWidth - RAIL - EDGE - fromWidth));
+          var right = Math.max(
+            EDGE,
+            Math.min(
+              fromRight - dx,
+              window.innerWidth - RAIL - EDGE - fromWidth,
+            ),
+          );
           last = { right: right, width: fromWidth };
         } else {
           // 内侧边缘：停在右侧时拖左边缘、停在左侧时拖右边缘
-          var width = clampWidth(side === "left" ? fromWidth + dx : fromWidth - dx);
-          last = { right: side === "left" ? fromRight - (width - fromWidth) : fromRight, width: width };
+          var width = clampWidth(
+            side === "left" ? fromWidth + dx : fromWidth - dx,
+          );
+          last = {
+            right:
+              side === "left" ? fromRight - (width - fromWidth) : fromRight,
+            width: width,
+          };
         }
         setPos(last.right, last.width);
       }
@@ -297,7 +329,10 @@
           var center = window.innerWidth - last.right - last.width / 2;
           side = center < (RAIL + window.innerWidth) / 2 ? "left" : "right";
         }
-        geom = side === "right" && Math.abs(last.width - 460) < 2 ? null : { side: side, width: last.width };
+        geom =
+          side === "right" && Math.abs(last.width - 460) < 2
+            ? null
+            : { side: side, width: last.width };
         applyGeom();
         saveGeom();
       }
@@ -407,9 +442,12 @@
     frameReady().then(function (w) {
       if (quote) w.lvEmbedAttach(quote);
       if (text)
-        setTimeout(function () {
-          w.lvEmbedFill(text);
-        }, quote ? 200 : 0);
+        setTimeout(
+          function () {
+            w.lvEmbedFill(text);
+          },
+          quote ? 200 : 0,
+        );
     });
   }
 
@@ -470,11 +508,14 @@
     tab.classList.toggle("is-hidden", mode !== "closed" || !!dockOpen);
     if (layer) aimDock(layer);
     // 单行（胶囊形）时小弧线由 CSS 藏起，展开成双行后才出现
-    if (dockOpen) mountArc(layer.querySelector(".composer-shell__body"), null, dockToSide);
+    if (dockOpen)
+      mountArc(layer.querySelector(".composer-shell__body"), null, dockToSide);
   }
   // 输入坞上挂着的引用商品（信息流卡片「Ask」带进来的，显示为附件卡片）→ 会话窗附件；按标题在商品池里找回商品信息
   function dockQuote(layer) {
-    var cards = layer.querySelectorAll(".ant-file-card-list-item:not(.ant-file-card-list-motion-leave)");
+    var cards = layer.querySelectorAll(
+      ".ant-file-card-list-item:not(.ant-file-card-list-motion-leave)",
+    );
     var card = cards[cards.length - 1];
     var titleEl = card && card.querySelector('[class*="_title_"]');
     var title = titleEl ? titleEl.textContent.trim() : "";
@@ -488,7 +529,13 @@
     return {
       quoteSource: "daily_picks_feed",
       display: { title: title, imageUrl: img ? img.src : "" },
-      pdp: { locator: { source: p ? p.store : "", region: "US", offerId: p ? String(p.info.offer_id) : "" } },
+      pdp: {
+        locator: {
+          source: p ? p.store : "",
+          region: "US",
+          offerId: p ? String(p.info.offer_id) : "",
+        },
+      },
       status: "active",
     };
   }
@@ -503,10 +550,17 @@
       // 输入框收成胶囊、或右侧会话窗开着时，引用都直接进会话窗（页面不回滚到顶部）；
       // 「单行」输入框常驻底部：引用直接挂到这条输入框上，页面同样不动
       var line = root.hasAttribute("data-lv-dock-line") && mode === "closed";
-      if (!btn || !layer || !(line || layer.hasAttribute("data-lv-compact") || mode !== "closed")) return;
+      if (
+        !btn ||
+        !layer ||
+        !(line || layer.hasAttribute("data-lv-compact") || mode !== "closed")
+      )
+        return;
       var card = btn.closest('[class*="_productCard_"]');
       var titleEl = card && card.querySelector('[class*="_productTitle_"]');
-      var title = titleEl ? (titleEl.getAttribute("title") || titleEl.textContent).trim() : "";
+      var title = titleEl
+        ? (titleEl.getAttribute("title") || titleEl.textContent).trim()
+        : "";
       if (!title) return;
       e.preventDefault();
       e.stopPropagation();
@@ -514,12 +568,24 @@
       var p =
         window.lvShop &&
         window.lvShop.products().filter(function (x) {
-          return x.info.title === title || x.info.title.indexOf(title.replace(/…$/, "")) === 0;
+          return (
+            x.info.title === title ||
+            x.info.title.indexOf(title.replace(/…$/, "")) === 0
+          );
         })[0];
       var quote = {
         quoteSource: "daily_picks_feed",
-        display: { title: p ? p.info.title : title, imageUrl: p ? p.info.image : img ? img.src : "" },
-        pdp: { locator: { source: p ? p.store : "", region: "US", offerId: p ? String(p.info.offer_id) : "" } },
+        display: {
+          title: p ? p.info.title : title,
+          imageUrl: p ? p.info.image : img ? img.src : "",
+        },
+        pdp: {
+          locator: {
+            source: p ? p.store : "",
+            region: "US",
+            offerId: p ? String(p.info.offer_id) : "",
+          },
+        },
         status: "active",
       };
       if (line && window.__lvAddQuote) {
@@ -537,7 +603,8 @@
     "click",
     function (e) {
       if (!on() || root.hasAttribute("data-lv-embed")) return;
-      var btn = e.target.closest && e.target.closest('[class*="_askMigooButton_"]');
+      var btn =
+        e.target.closest && e.target.closest('[class*="_askMigooButton_"]');
       var pdp = btn && btn.closest('aside[class*="_drawer_"]');
       if (!pdp) return;
       var titleEl = pdp.querySelector('h1[class*="_title_"]');
@@ -545,7 +612,9 @@
       if (!title) return;
       e.preventDefault();
       e.stopPropagation();
-      var img = pdp.querySelector('img[class*="_topImage_"]') || pdp.querySelector("img");
+      var img =
+        pdp.querySelector('img[class*="_topImage_"]') ||
+        pdp.querySelector("img");
       var p =
         window.lvShop &&
         window.lvShop.products().filter(function (x) {
@@ -557,8 +626,17 @@
       if (close) close.click();
       window.lvDrawerAttach({
         quoteSource: "daily_picks_feed",
-        display: { title: title, imageUrl: p ? p.info.image : img ? img.src : "" },
-        pdp: { locator: { source: p ? p.store : "", region: "US", offerId: p ? String(p.info.offer_id) : "" } },
+        display: {
+          title: title,
+          imageUrl: p ? p.info.image : img ? img.src : "",
+        },
+        pdp: {
+          locator: {
+            source: p ? p.store : "",
+            region: "US",
+            offerId: p ? String(p.info.offer_id) : "",
+          },
+        },
         status: "active",
       });
     },
@@ -568,7 +646,9 @@
   var pdpWasOpen = false;
   new MutationObserver(function () {
     if (!on() || root.hasAttribute("data-lv-embed")) return;
-    var pdpOpen = !!document.querySelector('aside[class*="_drawer_"][class*="_open_"]');
+    var pdpOpen = !!document.querySelector(
+      'aside[class*="_drawer_"][class*="_open_"]',
+    );
     if (pdpOpen && !pdpWasOpen && mode !== "closed") {
       // 新 PDP 顶掉会话窗：之前记的「回到 PDP」作废，改记「关 PDP 回到会话窗」
       pdpReturn = null;
@@ -583,7 +663,12 @@
       setMode(m);
     }
     pdpWasOpen = pdpOpen;
-  }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ["class"] });
+  }).observe(document.documentElement, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ["class"],
+  });
   // 输入框已经收成胶囊后，信息流里引用的商品会挂到（看不见的）输入框上：转进会话窗
   function forwardQuote(layer) {
     var quote = dockQuote(layer);
@@ -598,13 +683,23 @@
     var a = panel.getBoundingClientRect();
     var b = tab.getBoundingClientRect();
     if (!a.width || !b.width) return;
-    layer.style.setProperty("--lv-pill-dx", Math.round(b.left + b.width / 2 - (a.left + a.width / 2)) + "px");
-    layer.style.setProperty("--lv-pill-dy", Math.round(b.top + b.height / 2 - (a.top + a.height / 2)) + "px");
+    layer.style.setProperty(
+      "--lv-pill-dx",
+      Math.round(b.left + b.width / 2 - (a.left + a.width / 2)) + "px",
+    );
+    layer.style.setProperty(
+      "--lv-pill-dy",
+      Math.round(b.top + b.height / 2 - (a.top + a.height / 2)) + "px",
+    );
   }
   // 输入框收起 / 展开（data-lv-compact 变化）时同步胶囊
   new MutationObserver(function () {
     if (on()) syncTab();
-  }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ["data-lv-compact"] });
+  }).observe(document.documentElement, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["data-lv-compact"],
+  });
   window.addEventListener("resize", function () {
     if (on()) syncTab();
   });

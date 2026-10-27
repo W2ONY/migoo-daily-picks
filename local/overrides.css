@@ -4563,48 +4563,88 @@
   animation-delay: 0.3s;
 }
 /* 右下角的「Ask migoo」胶囊（原页面胶囊同款）：会话窗收起时随时拉开；Explore 上它就是收起的输入框 */
+/* 吸附在屏幕右边缘的品牌蓝半胶囊：左侧圆角、右侧贴边，比白底胶囊显眼；hover 往外多探出一截 */
 .lv-drawer-tab {
   position: fixed;
-  right: 24px;
+  right: 0;
   bottom: 40px;
   z-index: 2590;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   height: 56px;
-  padding: 16px 24px 16px 20px;
+  padding: 0 22px 0 8px;
   border: 0;
-  border-radius: 100px;
-  background: #fff;
-  box-shadow: 0 0 16px rgba(0, 0, 0, 0.16);
-  color: rgba(0, 0, 0, 0.87);
+  border-radius: 28px 0 0 28px;
+  background: linear-gradient(135deg, #4a80ff 0%, #2f6bff 45%, #1f4fe0 100%);
+  box-shadow:
+    0 8px 24px rgba(47, 107, 255, 0.38),
+    0 2px 6px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  color: #fff;
   font: inherit;
   font-family:
     Inter,
     -apple-system,
     sans-serif;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
   cursor: pointer;
-  transform-origin: center;
-  /* 出现：等输入框缩到这里再浮出 */
+  transform: translateX(0);
+  /* 出现：等输入框缩到这里再从右边缘滑出 */
   transition:
     opacity 0.26s ease 0.2s,
     transform 0.36s cubic-bezier(0.22, 0.8, 0.24, 1) 0.16s,
+    padding 0.22s ease,
     box-shadow 0.2s ease;
 }
 .lv-drawer-tab:hover {
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+  padding-right: 30px;
+  box-shadow:
+    0 10px 30px rgba(47, 107, 255, 0.48),
+    0 2px 6px rgba(15, 23, 42, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
-.lv-drawer-tab svg {
+.lv-drawer-tab-logo {
   flex: none;
-  width: 24px;
-  height: 24px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.18);
 }
-/* 藏起：立刻淡出，让输入框从这里放大回去 */
+.lv-drawer-tab-logo img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+/* 呼吸光圈：贴边以后仍然吸引目光，不打扰时只是一圈很淡的外扩 */
+.lv-drawer-tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 rgba(47, 107, 255, 0.45);
+  animation: lv-tab-pulse 2.6s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes lv-tab-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(47, 107, 255, 0.45);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 12px rgba(47, 107, 255, 0);
+  }
+}
+/* 藏起：立刻缩回右边缘外，让输入框 / 会话窗接手 */
 .lv-drawer-tab.is-hidden {
   opacity: 0;
-  transform: scale(0.7);
+  transform: translateX(100%);
   pointer-events: none;
   transition:
     opacity 0.14s ease,
@@ -4703,7 +4743,7 @@
 /* 方案四：PDP 打开时藏起右下角「Ask migoo」胶囊（PDP 自己右下角有 Ask Migoo，点它关 PDP、开会话窗并带上商品，见 drawer.js） */
 body:has(aside[class*="_drawer_"][class*="_open_"]) .lv-drawer-tab {
   opacity: 0;
-  transform: scale(0.7);
+  transform: translateX(100%);
   pointer-events: none;
 }
 
