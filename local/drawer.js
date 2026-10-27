@@ -181,7 +181,7 @@
     drawer.innerHTML =
       '<div class="lv-drawer-head"><span class="lv-drawer-title">' +
       '<img class="lv-brand-logo" src="' + base() + '/local/okiee-logo.png" alt="">' +
-      '<b>Okiee</b></span><span class="lv-drawer-actions">' +
+      '<b>Okiee Agent</b></span><span class="lv-drawer-actions">' +
       '<button type="button" class="lv-drawer-btn lv-drawer-size" aria-label="Expand"></button>' +
       '<button type="button" class="lv-drawer-btn lv-drawer-close" aria-label="Close">' +
       svg(ICON.close) +
