@@ -376,6 +376,62 @@
       },
     },
   ];
+
+  /* ---------- 推送专题（Price Drops 下方，参考 dupe.com/obsessions）：按用户在追踪 / 喜欢的商品推一组主题商品 ----------
+   * 每个专题：主标题 + 副标题 + 一行商品卡，底部「More good things」进对话看整组（走合集的对话承接；个性化理由只用在对话的引导语里）。
+   * 商品按 id 从商品池里挑，顺序即展示顺序。 */
+  var OBSESSIONS = [
+    {
+      key: "travel",
+      reason: "Because you're tracking the Sweetcrispy luggage",
+      title: "Carry On, Carry Less",
+      sub: "Packs, totes and red-eye comforts for lighter trips, a few at their lowest price this month.",
+      ids: [
+        "100000012672694", "100000012720079", "100000015390603", "100000012074883",
+        "100000024907809", "100000061914581", "100000012412936", "100000012859617",
+        "100000028169625", "100000012325817", "100000016573617", "100000016571695",
+      ],
+      thinking: ["Pulling travel packs and totes…", "Checking prices across stores…"],
+    },
+    {
+      key: "snacks",
+      reason: "Because you're tracking SNICKERS",
+      title: "The Snack Drawer, Restocked",
+      sub: "Chocolate, chews and fizzy pick-me-ups worth stocking up on while they're marked down.",
+      ids: [
+        "100000011542999", "100000012398870", "100000020230786", "100000018210408",
+        "100000011043838", "100000012670902", "100000010591599", "100000012677965",
+        "100000012674700", "100000012515854", "100000018155040", "100000012350893",
+      ],
+      thinking: ["Raiding the snack aisle…", "Keeping the ones on sale…"],
+    },
+  ];
+  // 专题补齐对话承接需要的字段（和 COLLECTIONS 同一套：query / pick / intro / badge）
+  OBSESSIONS.forEach(function (o) {
+    o.query = "Show me more from " + o.title;
+    o.pick = function (P) {
+      var byId = {};
+      P.forEach(function (p) {
+        byId[p.id] = p;
+      });
+      return o.ids
+        .map(function (id) {
+          return byId[id];
+        })
+        .filter(Boolean);
+    };
+    o.intro = function (items) {
+      // 「Because you're tracking X」→「since you're tracking X」
+      return "Here are all " + items.length + " picks from " + o.title + ", " + o.reason.replace(/^Because/, "since");
+    };
+    o.badge = function (p) {
+      return p.drop ? "−" + p.drop + "%" : p.lowest30 ? "Lowest in 30 days" : "";
+    };
+  });
+  // 对话里认得的所有合集（分类卡合集 + 推送专题）
+  function chatCollections() {
+    return COLLECTIONS.concat(OBSESSIONS);
+  }
   var FOLLOW_UNDER = 50;
 
   function itemsOf(c) {
@@ -443,8 +499,8 @@
         };
       }
     }
-    for (var i = 0; i < COLLECTIONS.length; i++) {
-      var c = COLLECTIONS[i];
+    for (var i = 0, all = chatCollections(); i < all.length; i++) {
+      var c = all[i];
       var items = itemsOf(c);
       if (text === c.intro(items))
         return { title: c.title, items: items, followUps: followUps(c, items) };
@@ -473,8 +529,8 @@
     if (text === CLAIM_TEXT || couponByClaimText(text)) return ["Claiming your coupon…", "Checking which items it works on…", "Applying it at checkout…"];
     if (text === MORE_DEALS_TEXT) return ["Scanning price history across stores…", "Picking the biggest drops…"];
     if (text === MORE_COUPONS_TEXT) return ["Checking stores for live coupons…", "Keeping the ones you can use…"];
-    for (var i = 0; i < COLLECTIONS.length; i++) {
-      var c = COLLECTIONS[i];
+    for (var i = 0, all = chatCollections(); i < all.length; i++) {
+      var c = all[i];
       if (text === c.query) return c.thinking;
       if (text === underQuery(c)) return ["Filtering " + c.title + " under $" + FOLLOW_UNDER + "…", "Re-ranking by savings…"];
       if (text === alertQuery(c)) return ["Setting up price alerts…", "Saving them to Auto-task…"];
@@ -579,8 +635,8 @@
         textBlock("Saved to your account: " + cp.desc + ". It applies automatically at checkout, no need to copy the code."),
       ];
     }
-    for (var i = 0; i < COLLECTIONS.length; i++) {
-      c = COLLECTIONS[i];
+    for (var i = 0, all = chatCollections(); i < all.length; i++) {
+      c = all[i];
       items = itemsOf(c);
       if (text === c.query) return [textBlock(c.intro(items))];
       if (text === underQuery(c)) {
@@ -622,7 +678,7 @@
     // 卡片下方的 Compare：Markdown 对比表
     m = /^Compare these (\d+) (.+) picks side by side$/.exec(text);
     if (m) {
-      c = COLLECTIONS.filter(function (x) {
+      c = chatCollections().filter(function (x) {
         return x.title === m[2];
       })[0];
       if (!c) return null;
@@ -911,6 +967,49 @@
     box.appendChild(scrollWrap(row, { label: "More good prices", query: MORE_DEALS_TEXT }));
     return box;
   }
+  /* ---------- 推送专题区块（OBSESSIONS）：主标题 / 副标题 + 一行商品卡（dupe 商品卡样式） ---------- */
+  // 专题商品卡：浅灰底方图 + 店铺 / 两行标题 / 划线原价 + 现价，点开 PDP
+  function obCard(p) {
+    var b = el("div", "lv-ob-card");
+    b.setAttribute("role", "button");
+    b.tabIndex = 0;
+    var media = el("span", "lv-ob-img");
+    var img = el("img");
+    img.alt = "";
+    img.loading = "lazy";
+    img.src = p.info.image;
+    media.appendChild(img);
+    if (p.drop) media.appendChild(el("span", "lv-ob-drop", "−" + p.drop + "%"));
+    b.appendChild(media);
+    b.appendChild(el("span", "lv-ob-store", storeName(p.store)));
+    b.appendChild(el("span", "lv-ob-name", p.info.title));
+    var prices = el("span", "lv-ob-prices");
+    if (p.drop) prices.appendChild(el("s", null, fmt(p.max)));
+    prices.appendChild(el("b", null, fmt(p.price)));
+    b.appendChild(prices);
+    b.onclick = function () {
+      openPdpFor(p);
+    };
+    b.onkeydown = function (e) {
+      if (e.key === "Enter") openPdpFor(p);
+    };
+    return b;
+  }
+  function buildObsession(o) {
+    var items = o.pick(products());
+    if (items.length < 4) return null;
+    var box = el("section", "lv-ob lv-ob-" + o.key);
+    var head = el("div", "lv-ob-head");
+    head.appendChild(el("h2", "lv-ob-title", o.title));
+    head.appendChild(el("p", "lv-ob-sub", o.sub));
+    box.appendChild(head);
+    var row = el("div", "lv-ob-row");
+    items.forEach(function (p) {
+      row.appendChild(obCard(p));
+    });
+    box.appendChild(scrollWrap(row, { label: "More good things", query: o.query }));
+    return box;
+  }
   // 横向滚动行 + 左右箭头（样式复用分类卡那一套）
   // chat：「对话」样式下底部按钮的文案与要发的 query（不传就仍是 See more 展开）
   function scrollWrap(row, chat) {
@@ -1192,6 +1291,10 @@
   function chatMode() {
     return root.getAttribute("data-lv-more") === "chat";
   }
+  // 方案三「按钮」样式（<html data-lv-more="button">）：只露一行，行里最后一张卡换成「More good …」按钮卡，点了进对话
+  function buttonMode() {
+    return root.getAttribute("data-lv-more") === "button";
+  }
   var ICON_DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
   var ICON_GO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12M13 7l5 5-5 5"/></svg>';
   function registerGrid(wrap, row, chat) {
@@ -1201,6 +1304,18 @@
     more.appendChild(btn);
     wrap.appendChild(more);
     var g = { wrap: wrap, row: row, more: more, btn: btn, chat: chat, shown: 1 };
+    // 行宽变了（窗口缩放、侧栏 / 会话窗挤占、方案切换）就重排：按钮卡要按新列数重新落位
+    if (window.ResizeObserver) {
+      var lastW = 0;
+      new ResizeObserver(function () {
+        var w = row.clientWidth;
+        if (!w || w === lastW) return;
+        lastW = w;
+        requestAnimationFrame(function () {
+          layoutGrid(g);
+        });
+      }).observe(row);
+    }
     btn.onclick = function () {
       if (chatMode() && chat) {
         sendQuery(chat.query);
@@ -1219,9 +1334,60 @@
     g.btn.innerHTML = "<span></span>" + (toChat ? ICON_GO : ICON_DOWN);
     g.btn.querySelector("span").textContent = toChat ? g.chat.label : "See more";
   }
+  // 「按钮」样式的按钮卡：叠放几张被收起商品的小图 + 「+N」+「More good …」
+  function tileFor(g) {
+    if (g.tile) return g.tile;
+    var t = el("button", "lv-more-tile");
+    t.type = "button";
+    t.appendChild(el("span", "lv-more-tile-thumbs"));
+    t.appendChild(el("span", "lv-more-tile-count"));
+    var label = el("span", "lv-more-tile-label");
+    label.appendChild(el("span", null, g.chat.label));
+    label.insertAdjacentHTML("beforeend", ICON_GO);
+    t.appendChild(label);
+    t.onclick = function () {
+      sendQuery(g.chat.query);
+    };
+    g.tile = t;
+    return t;
+  }
+  // 一行放几列就留几列减一张卡，按钮卡占最后一格；其余卡藏起（不进第二行）
+  function placeTile(g, on) {
+    var cards = [].filter.call(g.row.children, function (c) {
+      return !c.classList.contains("lv-more-tile");
+    });
+    if (!on) {
+      if (g.tile && g.tile.parentNode) g.tile.remove();
+      cards.forEach(function (c) {
+        c.classList.remove("lv-btn-hide");
+      });
+      return;
+    }
+    var tile = tileFor(g);
+    var cols = getComputedStyle(g.row).gridTemplateColumns.split(" ").filter(Boolean).length || 1;
+    var keep = Math.max(1, Math.min(cards.length + 1, cols) - 1);
+    cards.forEach(function (c, i) {
+      c.classList.toggle("lv-btn-hide", i >= keep);
+    });
+    var hidden = cards.slice(keep);
+    tile.querySelector(".lv-more-tile-count").textContent = hidden.length ? "+" + hidden.length : "";
+    var thumbs = tile.querySelector(".lv-more-tile-thumbs");
+    thumbs.innerHTML = "";
+    hidden.slice(0, 3).forEach(function (c) {
+      var src = c.querySelector("img");
+      if (!src) return;
+      var img = el("img");
+      img.alt = "";
+      img.src = src.src;
+      thumbs.appendChild(el("span")).appendChild(img);
+    });
+    g.row.insertBefore(tile, cards[keep] || null);
+  }
   function layoutGrid(g) {
     moreLabel(g);
-    if (!gridMode()) {
+    var tileOn = buttonMode() && gridMode() && !!g.chat;
+    placeTile(g, tileOn);
+    if (!gridMode() || tileOn) {
       g.row.style.maxHeight = "";
       g.wrap.classList.remove("has-more");
       return;
@@ -1303,6 +1469,11 @@
     section.appendChild(wrap);
     var tracker = buildTracker();
     if (tracker) section.appendChild(tracker);
+    // Price Drops 下面接按用户喜好推的专题
+    OBSESSIONS.forEach(function (o) {
+      var ob = buildObsession(o);
+      if (ob) section.appendChild(ob);
+    });
     var coupons = buildCoupons();
     if (coupons) section.appendChild(coupons);
     // 下方原信息流的标题（同「What are you shopping for?」样式）

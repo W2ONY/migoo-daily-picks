@@ -9,8 +9,9 @@
     { id: "v2", name: "方案二", desc: "Daydream 式顶栏：Explore + 个人中心" },
     { id: "v3", name: "方案三（旧）", desc: "Phia 式左侧窄栏：Chat / Explore / Favorites", hidden: true },
     { id: "v4", name: "方案四", desc: "方案三 + 信息流上方 Categories 商品分类", hidden: true },
-    { id: "v5", name: "方案三", desc: "左侧窄栏 + Explore 首屏、底部输入框（滚动收起）、小优惠券" },
-    { id: "v6", name: "方案四", desc: "方案三 + 右侧会话窗：任何页面都能拉开，可展开全屏，没有单独的会话页" },
+    // 原方案三（v5）不再单独出现：页面改动仍由现在的方案三复用（v6 = v5 + 右侧会话窗）；原方案四（v6）改名叫方案三
+    { id: "v5", name: "原方案三", desc: "左侧窄栏 + Explore 首屏、底部输入框（滚动收起）、小优惠券", hidden: true },
+    { id: "v6", name: "方案三", desc: "左侧窄栏 + Explore 首屏 + 右侧会话窗：任何页面都能拉开，可展开全屏，没有单独的会话页" },
   ];
   // hidden：不出现在切换菜单里，存过的也回落到默认方案（代码保留，方案五仍复用方案三、四的改动）
   var KEY = "local:variant";
@@ -66,22 +67,24 @@
   // 方案三（原方案四/五）样式分支（localStorage local:v4-layout）：
   //   chat = 对话（默认）：分区和「折叠」一样只露一行，底部按钮改为进对话（More good prices / More good savings）
   //   grid = 折叠：多行网格 + See more 展开；scroll = 横滑
-  // <html data-lv-layout> 只有 scroll / grid 两种排版（对话也按 grid 排），对话另加 data-lv-more="chat"
+  //   button = 按钮：只露一行，行里最后一张卡换成「More good …」按钮卡，点了进对话
+  // <html data-lv-layout> 只有 scroll / grid 两种排版（对话、按钮也按 grid 排），对话 / 按钮另加 data-lv-more="chat" / "button"
   var V4_LAYOUTS = [
     { id: "scroll", name: "横滑" },
     { id: "grid", name: "折叠" },
     { id: "chat", name: "对话" },
+    { id: "button", name: "按钮" },
   ];
   function v4Layout() {
     var v = null;
     try {
       v = localStorage.getItem("local:v4-layout");
     } catch (e) {}
-    return v === "scroll" || v === "grid" ? v : "chat";
+    return v === "scroll" || v === "grid" || v === "button" ? v : "chat";
   }
   function markLayout(id) {
     root.setAttribute("data-lv-layout", id === "scroll" ? "scroll" : "grid");
-    if (id === "chat") root.setAttribute("data-lv-more", "chat");
+    if (id === "chat" || id === "button") root.setAttribute("data-lv-more", id);
     else root.removeAttribute("data-lv-more");
   }
   function setV4Layout(id) {
@@ -143,10 +146,11 @@
 
   /* ---------- 悬浮球 ---------- */
   var ball, menu;
+  // 面板分两块：方案选择（只列方案）/ 页面设置（样式、输入框，只作用于方案三（v6）；在别的方案里点了会切过去）
   function renderMenu() {
     if (!menu) return;
     var v = current();
-    menu.innerHTML = '<div class="lv-menu-title">页面方案</div>';
+    menu.innerHTML = '<div class="lv-menu-title">方案选择</div>';
     VARIANTS.forEach(function (x) {
       if (x.hidden) return;
       var item = el(
@@ -165,10 +169,12 @@
         menu.classList.remove("is-open");
       };
       menu.appendChild(item);
-      // 各方案自己的分支挂在该方案下面（不选中也显示）：方案三 = 样式（方案四沿用同一套）；方案四 = 输入框自动 / 收起
-      if (x.id === "v5") menu.appendChild(segment("样式", V4_LAYOUTS, v4Layout(), setV4Layout, v === "v6" ? null : "v5"));
-      if (x.id === "v6") menu.appendChild(segment("输入框", V6_DOCKS, v6Dock(), setV6Dock, "v6"));
     });
+    menu.appendChild(el("div", "lv-menu-divider"));
+    menu.appendChild(el("div", "lv-menu-title", "页面设置"));
+    if (v !== "v6") menu.appendChild(el("div", "lv-menu-note", "作用于方案三，选择后会切到方案三"));
+    menu.appendChild(segment("样式", V4_LAYOUTS, v4Layout(), setV4Layout, "v6"));
+    menu.appendChild(segment("输入框", V6_DOCKS, v6Dock(), setV6Dock, "v6"));
     if (ball)
       ball.querySelector(".lv-ball-label").textContent = VARIANTS.filter(
         function (x) {
