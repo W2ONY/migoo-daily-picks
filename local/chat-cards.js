@@ -233,6 +233,7 @@
 
 
   // 在当前会话页的输入框里发一条消息（同 Explore 分类卡的做法）
+  window.lvSendInChat = sendInChat;
   function sendInChat(text) {
     var editors = document.querySelectorAll(".ProseMirror");
     var editor = editors[editors.length - 1];

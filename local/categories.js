@@ -395,6 +395,8 @@
     },
     {
       key: "snacks",
+      // Explore 上只留一个专题（零食已有清单合集 Snack Night）；数据留着，会话里旧的追问还认得
+      hidden: true,
       reason: "Because you're tracking SNICKERS",
       title: "The Snack Drawer, Restocked",
       sub: "Chocolate, chews and fizzy pick-me-ups worth stocking up on while they're marked down.",
@@ -1469,8 +1471,12 @@
     section.appendChild(wrap);
     var tracker = buildTracker();
     if (tracker) section.appendChild(tracker);
+    // Price Drops 下面是清单合集（local/bundles.js）
+    var bundles = window.lvBuildBundles && window.lvBuildBundles();
+    if (bundles) section.appendChild(bundles);
     // Price Drops 下面接按用户喜好推的专题
     OBSESSIONS.forEach(function (o) {
+      if (o.hidden) return;
       var ob = buildObsession(o);
       if (ob) section.appendChild(ob);
     });
@@ -1483,7 +1489,7 @@
   }
 
   // 给 compare.js 用的商品池与工具函数
-  window.lvShop = { products: products, storeName: storeName, storeLogo: storeLogo, sendQuery: sendQuery, fmt: fmt, money: money, seeded: seeded, byDrop: byDrop };
+  window.lvShop = { products: products, storeName: storeName, storeLogo: storeLogo, sendQuery: sendQuery, openPdp: openPdpFor, fmt: fmt, money: money, seeded: seeded, byDrop: byDrop };
 
   // Track Price Drops 设了 / 停了提醒：重建分区，Price Drops 列表跟着更新
   window.addEventListener("lv:tracked", function () {

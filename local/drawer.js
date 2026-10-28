@@ -227,7 +227,8 @@
   /* ---------- 侧边会话窗可拖动 + 边缘吸附：拖标题栏左右挪，松手吸到最近的一侧（左边缘贴着窄栏、或右边缘）；拖内侧边缘改宽度 ----------
    * 只在侧边模式（非全屏）生效；每次拉开都从右侧弹出（吸到左边只在这次打开期间有效），宽度记在 localStorage；
    * 双击标题栏复位到右侧默认宽度 */
-  var GEOM_KEY = "local:drawer-geom";
+  // v2：默认宽度改成半屏后，旧的宽度记录不再沿用
+  var GEOM_KEY = "local:drawer-geom-v2";
   var EDGE = 12; // 与窗口边缘、左侧窄栏之间留的空
   var RAIL = 64;
   var geom = null; // { side: "left" | "right", width }
@@ -255,6 +256,10 @@
       if (geom) localStorage.setItem(GEOM_KEY, JSON.stringify(geom));
       else localStorage.removeItem(GEOM_KEY);
     } catch (e) {}
+  }
+  // 和 overrides.css 的 --lv-dr-default 一致：半屏
+  function defaultWidth() {
+    return Math.max(340, Math.min(window.innerWidth / 2, window.innerWidth - 96));
   }
   function clampWidth(w) {
     return Math.max(340, Math.min(w, window.innerWidth - RAIL - EDGE * 2));
@@ -330,7 +335,7 @@
           side = center < (RAIL + window.innerWidth) / 2 ? "left" : "right";
         }
         geom =
-          side === "right" && Math.abs(last.width - 460) < 2
+          side === "right" && Math.abs(last.width - defaultWidth()) < 2
             ? null
             : { side: side, width: last.width };
         applyGeom();
