@@ -3,7 +3,7 @@
  * - Explore：Price Drops 下方一组合集卡，每张卡 = 几件搭配好的商品（叠放的商品图）+ 主题 / 副标题 + 整单总价（划线 = 各件平时价之和）。
  * - 点卡片：发「Show me the {title} list」，右侧会话里回复一句引导语，下面：
  *     一个气泡：上面是清单（勾选框可以去掉某件，数量固定为 1、不能改），
- *     底部收着账单（件数小计 / 省下的钱 / 按门店估算的运费 / 预估总价 + Save my list）；
+ *     底部收着账单（件数小计 / 省下的钱 / 按门店估算的运费 / 预估总价 + Like all）；
  *   气泡下方问一句推荐得对不对，再给三个追问（存清单 / 换便宜的 / 不太对）。
  * - 商品全部取自录制数据（window.lvShop.products()），「平时价」= 近 30 天最高价（没有降价的按现价）。
  * 依赖 categories.js 暴露的 window.lvShop；回复钩子包在 categories.js / try-this.js 的实现外面。
@@ -159,7 +159,37 @@
     );
   }
   function saveQuery(b) {
-    return "Looks right, save my " + b.title + " list";
+    return "Like all items in " + b.title;
+  }
+  // 「Like all」= 把清单里勾着的商品逐个走 like/set（mock-api 维护，Liked 页可见）；
+  // 勾选状态记在 localStorage，追问按钮 / 会话窗另一个 frame 里也能拿到
+  function pickedOf(b) {
+    var all = itemsOf(b);
+    try {
+      var ids = JSON.parse(localStorage.getItem("local:bd-picked:" + b.key) || "null");
+      if (ids)
+        return all.filter(function (p) {
+          return ids.indexOf(p.id) >= 0;
+        });
+    } catch (e) {}
+    return all;
+  }
+  function likeAll(items) {
+    items.forEach(function (p) {
+      fetch(location.protocol + "//sg." + location.host + "/beeai/api/v1/ecommerce/like/set", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          product: {
+            region: p.info.region || "US",
+            buybox_id: p.info.buybox_id,
+            cspu_id: String(p.id),
+            offer_id: p.info.offer_id,
+          },
+          target_state: 1,
+        }),
+      }).catch(function () {});
+    });
   }
   function cheaperQuery(b) {
     return "Swap in cheaper picks for " + b.title;
@@ -323,7 +353,7 @@
     });
     return box;
   }
-  // 账单收在同一个气泡底部，按小票排：左标签 / 右金额的明细行 → 分隔线 → 预估总价 → 说明小字 + Save my list
+  // 账单收在同一个气泡底部，按小票排：左标签 / 右金额的明细行 → 分隔线 → 预估总价 → 说明小字 + Like all
   function billFooter(b) {
     var box = el("div", "lv-bd-bill");
     var rows = el("div", "lv-bd-bill-rows");
@@ -333,7 +363,7 @@
     var foot = el("div", "lv-bd-bill-foot");
     var fine = el("p", "lv-bd-fine");
     foot.appendChild(fine);
-    var save = el("button", "lv-bd-save", "Save my list");
+    var save = el("button", "lv-bd-save", "Like all");
     save.type = "button";
     save.onclick = function () {
       if (window.lvSendInChat) window.lvSendInChat(saveQuery(b));
@@ -347,6 +377,16 @@
       rows.appendChild(r);
     }
     box.update = function (items) {
+      try {
+        localStorage.setItem(
+          "local:bd-picked:" + b.key,
+          JSON.stringify(
+            items.map(function (p) {
+              return p.id;
+            }),
+          ),
+        );
+      } catch (e) {}
       var bl = bill(items);
       rows.textContent = "";
       total.textContent = "";
@@ -438,16 +478,19 @@
         var b = BUNDLES[i];
         if (t === query(b)) return [textBlock(intro(b, itemsOf(b)))];
       }
-      var b2 = byTitle(/^Looks right, save my (.+) list$/, t);
+      var b2 = byTitle(/^Like all items in (.+)$/, t);
       if (b2) {
-        var bl = bill(itemsOf(b2));
+        var liked = pickedOf(b2);
+        likeAll(liked);
+        var bl = bill(liked);
         return [
           textBlock(
-            "Saved! Your **" +
-              b2.title +
-              "** list is in Favorites. I'll keep an eye on all " +
+            "Done! " +
               bl.count +
-              " prices and message you here if the total drops below " +
+              (bl.count === 1 ? " item" : " items") +
+              " from **" +
+              b2.title +
+              "** are now in your Likes. I'll keep an eye on their prices and message you here if the total drops below " +
               fmt(bl.total) +
               ".",
           ),
@@ -482,7 +525,7 @@
       if (t === cheaperQuery(b))
         return ["Looking for a lighter version…", "Re-adding the total…"];
       if (t === saveQuery(b))
-        return ["Saving your list…", "Setting up price watch…"];
+        return ["Adding to your Likes…", "Setting up price watch…"];
     }
     if (t === WRONG_TEXT) return ["Thinking…"];
     return prevThinking ? prevThinking(text) : ["Thinking…"];

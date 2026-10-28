@@ -64,7 +64,7 @@
     if (isHero()) document.body.setAttribute("data-daily-picks-input-entry", "");
     else document.body.removeAttribute("data-daily-picks-input-entry");
   }
-  // 方案三（原方案四/五）样式分支（localStorage local:v4-layout）：
+  // 方案三（原方案四/五）样式分支（localStorage local:v4-layout-v2；换 key 让旧的「横滑」记录失效）：
   //   chat = 对话：分区和「折叠」一样只露一行，底部按钮改为进对话（More good prices / More good savings）
   //   grid = 折叠：多行网格 + See more 展开；scroll = 横滑
   //   button = 按钮（默认）：只露一行，行里最后一张卡换成「More good …」按钮卡，点了进对话
@@ -78,7 +78,7 @@
   function v4Layout() {
     var v = null;
     try {
-      v = localStorage.getItem("local:v4-layout");
+      v = localStorage.getItem("local:v4-layout-v2");
     } catch (e) {}
     return v === "scroll" || v === "grid" || v === "chat" ? v : "button";
   }
@@ -89,16 +89,16 @@
   }
   function setV4Layout(id) {
     try {
-      localStorage.setItem("local:v4-layout", id);
+      localStorage.setItem("local:v4-layout-v2", id);
     } catch (e) {}
     markLayout(id);
     window.dispatchEvent(new Event("local:layout"));
   }
   markLayout(v4Layout());
 
-  // 方案四输入框分支（localStorage local:v6-dock）：auto = 自动（顶部展开、离开顶部收成胶囊）；
-  // collapsed = 收起（默认；任何位置都只露右下角「Ask Okiee」胶囊，输入都在右侧会话窗里进行）；
-  // line = 单行（参考 daydream.ing：底部常驻一条单行胶囊输入框，不收起，点进去展开成双行）
+  // 方案四输入框分支（localStorage local:v6-dock-v2；换 key 让旧记录失效）：auto = 自动（顶部展开、离开顶部收成胶囊）；
+  // collapsed = 收起（任何位置都只露右下角「Ask Okiee」胶囊，输入都在右侧会话窗里进行）；
+  // line = 单行（默认；参考 daydream.ing：底部常驻一条单行胶囊输入框，不收起，点进去展开成双行）
   var V6_DOCKS = [
     { id: "auto", name: "自动" },
     { id: "collapsed", name: "收起" },
@@ -107,13 +107,13 @@
   function v6Dock() {
     var v = null;
     try {
-      v = localStorage.getItem("local:v6-dock");
+      v = localStorage.getItem("local:v6-dock-v2");
     } catch (e) {}
-    return v === "auto" || v === "line" ? v : "collapsed";
+    return v === "auto" || v === "collapsed" ? v : "line";
   }
   function setV6Dock(id) {
     try {
-      localStorage.setItem("local:v6-dock", id);
+      localStorage.setItem("local:v6-dock-v2", id);
     } catch (e) {}
     schedulePlace();
   }
