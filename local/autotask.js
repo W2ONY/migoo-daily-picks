@@ -8,7 +8,7 @@
  * - 数据：和 Try-this「Track Price Drops」共用 localStorage lv:tracked（Price Drops 上的 Tracking 角标也读它），
  *   在原字段 {pid,target,scope,freq,notify,note,at} 上补 on（开关）/ channels（通知渠道）/ orig（开始追踪时的价格）/ prompt。
  *   首次进入写入一组演示任务（lv:at-seeded-v1，商品取自商品池真实数据）。
- * - 卡片：类型行（Price tracker + 开关）→ 商品行（点了开 PDP）→ 状态句 + 30 天走势小图（带目标线）→ Notify via
+ * - 卡片：类型行（Price tracker + 开关）→ 商品行（点了开 PDP）→ 状态句 → Notify via
  *   → Adjust with Okiee / 主按钮（达标 = Buy at 门店，未达标 = Adjust target，暂停 = Resume）/ •••。
  * - 条件面板：原版详情弹窗外壳 + 可拖目标线的 30 天价格图、目标价输入、快捷 -5%…-20% / 30 天最低、门店范围、通知渠道、Prompt。
  * - PDP：已追踪的商品在 PDP 底部按钮上方出一条 Tracking 条（Edit），未追踪的出「Track price」。
@@ -334,73 +334,6 @@
     );
   }
 
-  // 卡片上的 30 天小走势：价格线 + 目标虚线 + 今天的点
-  function spark(hist, target, muted) {
-    var w = 132;
-    var h = 52;
-    var lo = minOf(hist.concat([target]));
-    var hi = maxOf(hist.concat([target]));
-    var pad = (hi - lo) * 0.18 || hi * 0.1 || 1;
-    lo -= pad;
-    hi += pad;
-    var n = hist.length;
-    function X(i) {
-      return 3 + (i * (w - 6)) / (n - 1);
-    }
-    function Y(v) {
-      return 3 + ((hi - v) / (hi - lo)) * (h - 6);
-    }
-    var d = hist
-      .map(function (v, i) {
-        return (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1);
-      })
-      .join("");
-    var ty = Y(target).toFixed(1);
-    var last = hist[n - 1];
-    var blue = muted ? "rgba(0,0,0,.25)" : "#007aff";
-    return (
-      '<svg class="lvat-spark" viewBox="0 0 ' +
-      w +
-      " " +
-      h +
-      '" aria-hidden="true">' +
-      '<rect x="0" y="' +
-      ty +
-      '" width="' +
-      w +
-      '" height="' +
-      Math.max(0, h - ty) +
-      '" fill="' +
-      (muted ? "rgba(0,0,0,.03)" : "rgba(0,122,255,.06)") +
-      '"/>' +
-      '<line x1="0" x2="' +
-      w +
-      '" y1="' +
-      ty +
-      '" y2="' +
-      ty +
-      '" stroke="' +
-      blue +
-      '" stroke-width="1.2" stroke-dasharray="3 3"/>' +
-      '<path d="' +
-      d +
-      '" fill="none" stroke="' +
-      (muted ? "rgba(0,0,0,.3)" : "rgba(0,0,0,.6)") +
-      '" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>' +
-      '<circle cx="' +
-      X(n - 1).toFixed(1) +
-      '" cy="' +
-      Y(last).toFixed(1) +
-      '" r="3.2" fill="' +
-      (!muted && last <= target
-        ? "#007aff"
-        : muted
-          ? "rgba(0,0,0,.35)"
-          : "#1f2329") +
-      '" stroke="#fff" stroke-width="1.2"/>' +
-      "</svg>"
-    );
-  }
 
   /* ================= 页面：/daily-picks#auto-task ================= */
   var layer = null;
@@ -705,10 +638,6 @@
     }
     main.appendChild(pr);
     prod.appendChild(main);
-    prod.insertAdjacentHTML(
-      "beforeend",
-      spark(historyOf(p), t.target, t.st === "paused"),
-    );
     c.appendChild(prod);
 
     // 状态句（App 文案）

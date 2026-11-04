@@ -406,14 +406,6 @@ html[data-lvat-open] [class*="_dockLayer_"] {
   font-size: 12px;
   font-weight: 600;
 }
-.lvat-spark {
-  width: 132px;
-  height: 52px;
-  flex-shrink: 0;
-}
-.lvat.is-one .lvat-spark {
-  width: 160px;
-}
 
 .lvat-status {
   display: flex;
