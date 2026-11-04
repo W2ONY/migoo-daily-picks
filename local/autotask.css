@@ -1,0 +1,1289 @@
+/*
+ * Auto-task · 电商版（local/autotask.js）
+ * 卡片 / 开关 / 按钮 / 标签 / 详情弹窗的尺寸与颜色照搬 migoo.ai/auto-task 源码（tools/autotask-ref/ 下的 *.module.less），
+ * 新增的商品行、价格图、PDP 条沿用同一套 token：文字 rgba(0,0,0,.87/.65/.4)、描边 rgba(0,0,0,.09)、主色 #007aff。
+ */
+
+/* ---------------- 覆盖层：盖在 Daily Picks 内容区上 ---------------- */
+.lvat {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow-y: auto;
+  background: #fff;
+  color: rgba(0, 0, 0, 0.87);
+  font-family:
+    MigooUIInter,
+    Inter,
+    -apple-system,
+    "SF Pro Text",
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+/* 覆盖层打开时藏起 Explore 的底部输入坞，会话入口只留右下角 Ask Okiee */
+html[data-lvat-open] [class*="_dockLayer_"] {
+  display: none !important;
+}
+.lvat *,
+.lvat-ov * {
+  box-sizing: border-box;
+}
+.lvat button,
+.lvat-ov button,
+.lvat-pdp button {
+  font: inherit;
+}
+
+.lvat-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  height: 72px;
+  padding: 0 24px;
+  background: #fff;
+}
+.lvat-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.87);
+}
+.lvat-body {
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 8px 0 64px;
+}
+
+/* 筛选 + Add */
+.lvat-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.lvat-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.lvat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 1000px;
+  background: #fff;
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: -0.21px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.lvat-chip:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+.lvat-chip-n {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 13px;
+}
+.lvat-chip.is-on {
+  background: #f5faff;
+  border-color: rgba(0, 122, 255, 0.2);
+  color: #007aff;
+}
+.lvat-chip.is-on .lvat-chip-n {
+  color: rgba(0, 122, 255, 0.65);
+}
+/* 原版 Add 按钮 */
+.lvat-add {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 32px;
+  padding: 5px 16px 5px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #007aff;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 510;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.lvat-add:hover {
+  filter: brightness(0.95);
+}
+.lvat-add svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* 分组 */
+.lvat-sec {
+  margin-top: 28px;
+}
+.lvat-sec-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 510;
+  line-height: 1.4;
+  letter-spacing: -0.48px;
+}
+.lvat-sec-n {
+  min-width: 22px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+  text-align: center;
+}
+.lvat-sec:first-of-type .lvat-sec-n {
+  background: #eaf3ff;
+  color: #007aff;
+}
+.lvat-sec-sub {
+  margin: 2px 0 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.45);
+}
+.lvat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.lvat-sec:not(:has(.lvat-sec-h)) .lvat-grid {
+  margin-top: 8px;
+}
+.lvat.is-one .lvat-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.lvat-none {
+  margin: 40px 0;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ---------------- 卡片（原版 .card + 商品行） ---------------- */
+.lvat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 16px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    box-shadow 0.16s ease,
+    border-color 0.16s ease;
+}
+.lvat-card:hover {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+}
+.lvat-card:focus-visible {
+  outline: 2px solid rgba(0, 122, 255, 0.5);
+  outline-offset: 2px;
+}
+.lvat-card.is-reached {
+  border-color: rgba(0, 122, 255, 0.28);
+  background: linear-gradient(180deg, #f7fbff 0, #fff 120px);
+}
+.lvat-card.is-flash {
+  animation: lvat-flash 1.8s ease;
+}
+@keyframes lvat-flash {
+  0%,
+  45% {
+    border-color: #007aff;
+    box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.18);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 122, 255, 0);
+  }
+}
+
+.lvat-owner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lvat-owner-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #eaf3ff;
+  color: #007aff;
+  flex-shrink: 0;
+}
+.lvat-owner-ico svg {
+  width: 13px;
+  height: 13px;
+}
+.lvat-owner-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.65);
+}
+.lvat-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.09);
+}
+
+/* 原版开关 */
+.lvat-toggle {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 28px;
+  padding: 2px;
+  border: 0;
+  border-radius: 100px;
+  background: rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.lvat-toggle.is-on {
+  background: #007aff;
+}
+.lvat-toggle-thumb {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  transition: transform 0.16s ease;
+}
+.lvat-toggle.is-on .lvat-toggle-thumb {
+  transform: translateX(20px);
+}
+
+.lvat-prod {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: -6px;
+  padding: 6px;
+  border-radius: 12px;
+  transition: background 0.12s ease;
+}
+.lvat-prod:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+.lvat-prod-img,
+.lvat-ph-img,
+.lvat-tile-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fff;
+}
+.lvat-prod-img {
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+}
+.lvat-prod-img img,
+.lvat-ph-img img,
+.lvat-tile-img img {
+  max-width: 88%;
+  max-height: 88%;
+  object-fit: contain;
+}
+.lvat-prod-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.lvat-prod-name,
+.lvat-ph-name {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.48px;
+  color: rgba(0, 0, 0, 0.87);
+}
+.lvat-prod-name span,
+.lvat-ph-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lvat-prod-name svg,
+.lvat-ph-name svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.26);
+}
+.lvat-prod-meta,
+.lvat-ph-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.45);
+}
+.lvat-logo {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+.lvat-dot {
+  color: rgba(0, 0, 0, 0.25);
+}
+.lvat-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.lvat-rating svg {
+  width: 12px;
+  height: 12px;
+  color: #f5a623;
+}
+.lvat-prod-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 2px;
+}
+.lvat-prod-price b {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: rgba(0, 0, 0, 0.87);
+}
+.lvat-prod-price s {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.35);
+}
+.lvat-off {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #e8f6ee;
+  color: #0e8a4a;
+  font-size: 12px;
+  font-weight: 600;
+}
+.lvat-spark {
+  width: 132px;
+  height: 52px;
+  flex-shrink: 0;
+}
+.lvat.is-one .lvat-spark {
+  width: 160px;
+}
+
+.lvat-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: -0.42px;
+  color: rgba(0, 0, 0, 0.65);
+}
+.lvat-status svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.4);
+}
+.is-reached .lvat-status {
+  color: #007aff;
+  font-weight: 500;
+}
+.is-reached .lvat-status svg {
+  color: #007aff;
+}
+.lvat-channels {
+  margin: -4px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: -0.42px;
+  color: rgba(0, 0, 0, 0.4);
+}
+.is-paused .lvat-prod-img,
+.is-paused .lvat-prod-price {
+  opacity: 0.55;
+}
+
+.lvat-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+}
+/* 原版 Adjust 按钮 */
+.lvat-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 72px;
+  height: 32px;
+  padding: 5px 16px;
+  border: 1px solid rgb(0 0 0 / 9%);
+  border-radius: 8px;
+  background: #fff;
+  color: rgb(0 0 0 / 87%);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.lvat-btn:hover {
+  background: rgb(0 0 0 / 2%);
+}
+.lvat-btn-primary {
+  border-color: #007aff;
+  background: #007aff;
+  color: #fff;
+}
+.lvat-btn-primary:hover {
+  background: #007aff;
+  filter: brightness(0.95);
+}
+.lvat-btn-soft {
+  border-color: transparent;
+  background: #eef5ff;
+  color: #007aff;
+}
+.lvat-btn-soft:hover {
+  background: #e3efff;
+}
+.lvat-btn-danger {
+  border-color: #ff3b30;
+  background: #ff3b30;
+  color: #fff;
+}
+.lvat-btn-danger:hover {
+  background: #ff3b30;
+  filter: brightness(0.95);
+}
+.lvat-btn-icon {
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+}
+.lvat-btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* 原版菜单 */
+.lvat-more {
+  position: relative;
+  display: inline-flex;
+}
+.lvat-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 10;
+  min-width: 190px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+.lvat-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 14px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.lvat-menu-item:hover {
+  background: #f5f5f5;
+}
+.lvat-menu-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: rgba(0, 0, 0, 0.55);
+}
+.lvat-menu-item.is-danger,
+.lvat-menu-item.is-danger svg {
+  color: #e5383b;
+}
+.lvat-menu-item.is-danger {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* 空态 */
+.lvat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 96px 0;
+  text-align: center;
+}
+.lvat-empty-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: #eef5ff;
+  color: #007aff;
+}
+.lvat-empty-ico svg {
+  width: 28px;
+  height: 28px;
+}
+.lvat-empty-t {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 510;
+}
+.lvat-empty-s {
+  max-width: 360px;
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* ---------------- 弹窗（原版 DetailModal） ---------------- */
+.lvat-ov {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: safe center;
+  padding: 48px 20px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(0, 0, 0, 0.87);
+  font-family:
+    MigooUIInter,
+    Inter,
+    -apple-system,
+    "SF Pro Text",
+    Roboto,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+.lvat-ov.is-in {
+  opacity: 1;
+}
+.lvat-ov-top {
+  z-index: 2100;
+}
+.lvat-modal {
+  display: flex;
+  flex-direction: column;
+  width: 800px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 96px);
+  min-height: 400px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.lvat-mh {
+  display: flex;
+  flex-shrink: 0;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px;
+}
+.lvat-mh-title {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.lvat-mh-name {
+  flex-shrink: 0;
+  font-size: 20px;
+  font-weight: 590;
+  line-height: 1.4;
+}
+.lvat-mh-by {
+  margin-top: 3px;
+  overflow: hidden;
+  color: #999;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.lvat-mh-acts {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 12px;
+  min-height: 28px;
+}
+.lvat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.87);
+  cursor: pointer;
+}
+.lvat-icon svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+.lvat-back {
+  margin: 2px -4px 0 -4px;
+}
+.lvat-mb {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 0;
+  padding: 0 24px 4px;
+  overflow-y: auto;
+}
+.lvat-mf {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+.lvat-mf-note {
+  min-width: 0;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  line-height: 1.4;
+}
+/* 原版 Update 按钮 */
+.lvat-update {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: #007aff;
+  color: #fff;
+  font-size: 17.5px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+}
+.lvat-update:not(.is-disabled):hover {
+  filter: brightness(0.95);
+}
+.lvat-update.is-disabled {
+  background: #8abbf5;
+  cursor: not-allowed;
+}
+
+/* 商品头 */
+.lvat-ph {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 16px;
+}
+.lvat-ph-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+}
+.lvat-ph-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.lvat-ph-name {
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.lvat-ph-name:hover span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lvat-ph-now {
+  margin-top: 2px;
+  color: #007aff;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+.lvat-ph-stats {
+  display: flex;
+  flex-shrink: 0;
+  gap: 20px;
+  padding-left: 20px;
+  border-left: 1px solid rgba(0, 0, 0, 0.06);
+}
+.lvat-ph-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lvat-ph-stat span {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+}
+.lvat-ph-stat b {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 区块（原版 .section / .label） */
+.lvat-sec2 {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 8px;
+}
+.lvat-label-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.lvat-label {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 510;
+  line-height: 1.4;
+  letter-spacing: -0.48px;
+  color: rgba(0, 0, 0, 0.87);
+}
+.lvat-label-tip {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.lvat-sublabel {
+  margin: 6px 0 0;
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 14px;
+}
+.lvat-desc {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* 价格图 */
+.lvat-chart {
+  padding: 6px 0 2px;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 16px;
+}
+.lvat-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.lvat-chart.is-hot .lvat-chart-svg,
+.lvat-chart.is-drag .lvat-chart-svg {
+  cursor: ns-resize;
+}
+.lvat-ax {
+  fill: rgba(0, 0, 0, 0.4);
+  font-size: 11px;
+}
+.lvat-ax-b {
+  fill: rgba(0, 0, 0, 0.7);
+  font-weight: 500;
+}
+.lvat-ax-blue {
+  fill: #007aff;
+  font-weight: 500;
+}
+.lvat-handle-t {
+  fill: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.lvat-chart.is-drag .lvat-handle rect {
+  filter: drop-shadow(0 2px 4px rgba(0, 122, 255, 0.35));
+}
+
+/* 目标价输入（App 的灰底输入框） */
+.lvat-price-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 4px;
+}
+.lvat-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 240px;
+  height: 48px;
+  padding: 0 12px 0 16px;
+  border-radius: 12px;
+  background: #f2f3f5;
+  cursor: text;
+  transition:
+    background 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.lvat-input:focus-within {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.35);
+}
+.lvat-input-cur {
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 18px;
+  font-weight: 500;
+}
+.lvat-input input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: rgba(0, 0, 0, 0.87);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 500;
+}
+.lvat-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.32);
+  color: #fff;
+  cursor: pointer;
+}
+.lvat-x svg {
+  width: 12px;
+  height: 12px;
+}
+.lvat-hint {
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.lvat-hint b {
+  color: #007aff;
+  font-weight: 500;
+}
+.lvat-hint.is-warn b {
+  color: #d46b08;
+}
+
+/* 原版标签（Notify via） */
+.lvat-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.lvat-tag {
+  padding: 8px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 1000px;
+  background: #fff;
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 14px;
+  line-height: 1.4;
+  letter-spacing: -0.21px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.lvat-tag:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+.lvat-tag.is-on {
+  border-color: rgba(0, 122, 255, 0.2);
+  background: #f5faff;
+  color: #007aff;
+}
+
+/* Prompt 折叠区（原版 promptFrame / textarea） */
+.lvat-prompt-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.lvat-chev {
+  align-self: center;
+  display: inline-flex;
+  margin-left: auto;
+  color: rgba(0, 0, 0, 0.4);
+  transition: transform 0.16s ease;
+}
+.lvat-chev svg {
+  width: 18px;
+  height: 18px;
+}
+.lvat-prompt.is-open .lvat-chev {
+  transform: rotate(90deg);
+}
+.lvat-prompt-frame {
+  display: none;
+  padding: 16px 0;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  background: #fff;
+}
+.lvat-prompt.is-open .lvat-prompt-frame {
+  display: flex;
+}
+.lvat-textarea {
+  width: 100%;
+  min-height: 20px;
+  padding: 0 16px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #000;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: none;
+  overflow: hidden;
+}
+
+/* 删除确认 */
+.lvat-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 400px;
+  max-width: calc(100vw - 40px);
+  padding: 24px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+.lvat-confirm h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 590;
+}
+.lvat-confirm p {
+  margin: 0 0 16px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.lvat-confirm-acts {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ---------------- Add：选商品 ---------------- */
+.lvat-picker .lvat-mb {
+  gap: 16px;
+}
+.lvat-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: #f2f3f5;
+  cursor: text;
+}
+.lvat-search:focus-within {
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.35);
+}
+.lvat-search svg {
+  width: 18px;
+  height: 18px;
+  color: rgba(0, 0, 0, 0.4);
+  flex-shrink: 0;
+}
+.lvat-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+}
+.lvat-picker .lvat-chips {
+  flex: none;
+}
+.lvat-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding-bottom: 12px;
+}
+.lvat-tiles .lvat-none {
+  grid-column: 1 / -1;
+}
+.lvat-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.lvat-tile:hover {
+  border-color: rgba(0, 122, 255, 0.4);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+.lvat-tile-img {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 0;
+  border-radius: 10px;
+}
+.lvat-tile-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: #eaf3ff;
+  color: #007aff;
+  font-size: 11px;
+  font-weight: 600;
+}
+.lvat-tile-badge.is-off {
+  background: #e8f6ee;
+  color: #0e8a4a;
+}
+.lvat-tile-name {
+  display: -webkit-box;
+  height: 35px;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.35;
+  color: rgba(0, 0, 0, 0.87);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.lvat-tile-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+}
+.lvat-tile-meta b {
+  font-weight: 600;
+}
+.lvat-tile-meta span {
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.lvat-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #007aff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.lvat-link svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------------- PDP 底部的 Price tracker 条 ---------------- */
+.lvat-pdp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 12px 8px;
+  padding: 10px 10px 10px 12px;
+  border-radius: 12px;
+  background: #f5faff;
+  color: rgba(0, 0, 0, 0.87);
+  font-family:
+    MigooUIInter,
+    Inter,
+    -apple-system,
+    "SF Pro Text",
+    Roboto,
+    sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.lvat-pdp.is-none {
+  background: #f6f7f8;
+}
+.lvat-pdp-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  color: #007aff;
+}
+.lvat-pdp-ico svg {
+  width: 17px;
+  height: 17px;
+}
+.lvat-pdp.is-paused .lvat-pdp-ico {
+  color: rgba(0, 0, 0, 0.45);
+}
+.lvat-pdp-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.lvat-pdp-main b {
+  overflow: hidden;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.lvat-pdp.is-reached .lvat-pdp-main b {
+  color: #007aff;
+}
+.lvat-pdp-main span {
+  overflow: hidden;
+  color: rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.lvat-pdp-btn {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid #007aff;
+  border-radius: 8px;
+  background: #007aff;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.lvat-pdp-btn.is-soft {
+  border-color: rgba(0, 122, 255, 0.25);
+  background: #fff;
+  color: #007aff;
+}
+
+/* 页脚：恢复演示数据 */
+.lvat-pagefoot {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+.lvat-reset {
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  color: rgba(0, 0, 0, 0.35);
+  font-size: 13px;
+  cursor: pointer;
+}
+.lvat-reset:hover {
+  color: rgba(0, 0, 0, 0.6);
+  text-decoration: underline;
+}

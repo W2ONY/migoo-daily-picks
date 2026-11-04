@@ -472,6 +472,19 @@
     });
   };
 
+  // 挂附件（可选）+ 往会话输入框填一句话，不发送，等用户改完再发（Auto-task 的 Adjust with Okiee）
+  window.lvDrawerFill = function (text, quote) {
+    open();
+    return frameReady().then(function (w) {
+      if (!quote) return w.lvEmbedFill(text);
+      return w.lvEmbedAttach(quote).then(function () {
+        setTimeout(function () {
+          w.lvEmbedFill(text);
+        }, 200);
+      });
+    });
+  };
+
   /* ---------- 没有单独的会话页：顶层路由到会话就退回原页面、拉开会话窗 ---------- */
   var lastPage = null;
   function onRoute() {

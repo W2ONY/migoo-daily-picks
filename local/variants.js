@@ -374,7 +374,7 @@
       var img = railAvatar.querySelector("img");
       if (avatar && img.src !== avatar.src) img.src = avatar.src;
       [].forEach.call(railItems.children, function (b) {
-        var active = b._match.test(lvPath());
+        var active = b._match.test(lvPath() + location.hash);
         b.classList.toggle("is-active", active);
       });
     }
@@ -664,9 +664,10 @@
     heart: '<path d="M12 19.5s-7.5-4.4-7.5-10A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 7.5 2.5c0 5.6-7.5 10-7.5 10Z"/>',
   };
   var RAIL_ITEMS = [
-    { key: "explore", label: "Explore", path: "/daily-picks", match: /^\/daily-picks\/?$/ },
+    // 窄栏高亮按「路径 + hash」判断：Auto-task 是盖在 Daily Picks 上的覆盖层 /daily-picks#auto-task（autotask.js）
+    { key: "explore", label: "Explore", path: "/daily-picks", match: /^\/daily-picks\/?(#(?!auto-task).*)?$/ },
     { key: "chat", label: "Chat", path: "/home", match: /^\/(home|chat)/ },
-    { key: "autotask", label: "Auto-task", path: "/auto-task", match: /^\/auto-task/ },
+    { key: "autotask", label: "Auto-task", path: "/daily-picks#auto-task", match: /^\/auto-task|#auto-task$/ },
     { key: "heart", label: "Favorites", path: "/daily-picks/likes", match: /^\/daily-picks\/likes/ },
   ];
   var rail, railItems, railAvatar, recent, recentHideTimer, backBtn;
